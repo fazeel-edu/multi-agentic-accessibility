@@ -10,6 +10,8 @@ Verified against PyPI on 2026-11-21 (re-verify at each pin change).
 | pydantic | ==2.14.4 | 2.14.4 |
 | fastapi | ==0.165.0 | 0.165.0 |
 | jinja2 | >=3.1.6 | 3.1.6 |
+| lxml | ==6.1.3 (pinned HTML parser for element keys, AD-15) | 6.1.3 |
+| cssselect | ==1.6.0 (CSS to XPath for element keys) | 1.6.0 |
 | pytest (dev) | >=9.2 | 9.2.0 |
 | ruff (dev) | >=0.17 | 0.17.6 |
 

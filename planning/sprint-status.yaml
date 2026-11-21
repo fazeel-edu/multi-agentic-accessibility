@@ -38,7 +38,7 @@ development_status:
   epic-1: in-progress
   1-1-project-scaffold-and-dependency-rules: review
   1-2-shared-contract-models-and-exported-schema: review
-  1-3-store-config-loader-and-config-hash: backlog
+  1-3-store-config-loader-and-config-hash: review
   1-4-t1-t9-fixture-page: backlog
   1-5-element_key-normaliser: backlog
   1-6-capture-a-page: backlog

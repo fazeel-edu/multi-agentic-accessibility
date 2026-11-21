@@ -1,0 +1,205 @@
+{
+  "schema_version": "1",
+  "status": "draft",
+  "frozen_on": null,
+  "criteria": [
+    {
+      "criterion": "1.1.1",
+      "name": "Non-text Content",
+      "level": "A",
+      "type": "M",
+      "roles": [
+        "screen_reader"
+      ]
+    },
+    {
+      "criterion": "1.3.1",
+      "name": "Info and Relationships",
+      "level": "A",
+      "type": "M",
+      "roles": [
+        "screen_reader"
+      ]
+    },
+    {
+      "criterion": "1.3.2",
+      "name": "Meaningful Sequence",
+      "level": "A",
+      "type": "J",
+      "roles": [
+        "screen_reader",
+        "cognitive"
+      ]
+    },
+    {
+      "criterion": "1.4.1",
+      "name": "Use of Colour",
+      "level": "A",
+      "type": "J",
+      "roles": [
+        "colour_visual"
+      ]
+    },
+    {
+      "criterion": "1.4.3",
+      "name": "Contrast (Minimum)",
+      "level": "AA",
+      "type": "R",
+      "roles": [
+        "colour_visual"
+      ]
+    },
+    {
+      "criterion": "1.4.10",
+      "name": "Reflow",
+      "level": "AA",
+      "type": "M",
+      "roles": [
+        "colour_visual"
+      ]
+    },
+    {
+      "criterion": "1.4.11",
+      "name": "Non-text Contrast",
+      "level": "AA",
+      "type": "R",
+      "roles": [
+        "colour_visual"
+      ]
+    },
+    {
+      "criterion": "2.1.1",
+      "name": "Keyboard",
+      "level": "A",
+      "type": "M",
+      "roles": [
+        "keyboard"
+      ]
+    },
+    {
+      "criterion": "2.1.2",
+      "name": "No Keyboard Trap",
+      "level": "A",
+      "type": "M",
+      "roles": [
+        "keyboard"
+      ]
+    },
+    {
+      "criterion": "2.4.1",
+      "name": "Bypass Blocks",
+      "level": "A",
+      "type": "R",
+      "roles": [
+        "keyboard",
+        "screen_reader"
+      ]
+    },
+    {
+      "criterion": "2.4.3",
+      "name": "Focus Order",
+      "level": "A",
+      "type": "J",
+      "roles": [
+        "keyboard"
+      ]
+    },
+    {
+      "criterion": "2.4.4",
+      "name": "Link Purpose, In Context",
+      "level": "A",
+      "type": "J",
+      "roles": [
+        "screen_reader",
+        "plain_language"
+      ]
+    },
+    {
+      "criterion": "2.4.6",
+      "name": "Headings and Labels",
+      "level": "AA",
+      "type": "J",
+      "roles": [
+        "screen_reader",
+        "plain_language",
+        "cognitive"
+      ]
+    },
+    {
+      "criterion": "2.4.7",
+      "name": "Focus Visible",
+      "level": "AA",
+      "type": "M",
+      "roles": [
+        "keyboard"
+      ]
+    },
+    {
+      "criterion": "2.4.11",
+      "name": "Focus Not Obscured, Minimum",
+      "level": "AA",
+      "type": "M",
+      "roles": [
+        "keyboard",
+        "colour_visual"
+      ]
+    },
+    {
+      "criterion": "3.1.1",
+      "name": "Language of Page",
+      "level": "A",
+      "type": "R",
+      "roles": [
+        "plain_language"
+      ]
+    },
+    {
+      "criterion": "3.3.1",
+      "name": "Error Identification",
+      "level": "A",
+      "type": "M",
+      "roles": [
+        "cognitive",
+        "plain_language"
+      ]
+    },
+    {
+      "criterion": "3.3.2",
+      "name": "Labels or Instructions",
+      "level": "A",
+      "type": "J",
+      "roles": [
+        "cognitive",
+        "plain_language"
+      ]
+    },
+    {
+      "criterion": "3.3.3",
+      "name": "Error Suggestion",
+      "level": "AA",
+      "type": "J",
+      "roles": [
+        "cognitive",
+        "plain_language"
+      ]
+    },
+    {
+      "criterion": "3.3.7",
+      "name": "Redundant Entry",
+      "level": "A",
+      "type": "J",
+      "roles": [
+        "cognitive"
+      ]
+    },
+    {
+      "criterion": "4.1.2",
+      "name": "Name, Role, Value",
+      "level": "A",
+      "type": "M",
+      "roles": [
+        "screen_reader"
+      ]
+    }
+  ]
+}

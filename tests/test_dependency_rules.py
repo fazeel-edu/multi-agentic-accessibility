@@ -6,8 +6,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 PACKAGES = {
-    "config", "contract", "capture", "tools", "auditors", "postprocess",
-    "eval", "store", "review", "cli", "tools_dev",
+    "config",
+    "contract",
+    "capture",
+    "tools",
+    "auditors",
+    "postprocess",
+    "eval",
+    "store",
+    "review",
+    "cli",
+    "tools_dev",
 }
 
 # Allowed project imports per package. "tools.element" is the only part of
@@ -58,8 +67,13 @@ def violations(owner: str, source: str) -> list[str]:
             continue
         # `from tools import element` yields both `tools` and `tools.element`;
         # the bare package form is fine when the submodule form is allowed.
-        if any(a.startswith(top + ".") and a != target and _permitted(owner, a)
-               for a in ALLOWED[owner]) and "." not in target:
+        if (
+            any(
+                a.startswith(top + ".") and a != target and _permitted(owner, a)
+                for a in ALLOWED[owner]
+            )
+            and "." not in target
+        ):
             continue
         bad.append(f"{owner} -> {target}")
     return bad
@@ -75,7 +89,9 @@ def test_project_follows_dependency_graph():
     problems = []
     for owner in PACKAGES:
         for path in (ROOT / owner).rglob("*.py"):
-            problems += [f"{path.relative_to(ROOT)}: {v}" for v in violations(owner, path.read_text())]
+            problems += [
+                f"{path.relative_to(ROOT)}: {v}" for v in violations(owner, path.read_text())
+            ]
     assert not problems, "\n".join(problems)
 
 

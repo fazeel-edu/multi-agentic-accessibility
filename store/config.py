@@ -8,9 +8,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
-from contract.enums import IssueType, Phase, Role
+from contract.enums import Phase
 from contract.errors import ConfigError
-from contract.models import Criterion
+from contract.matrix import CriteriaMatrix
 from store.paths import CONFIG_DIR
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
@@ -48,27 +48,6 @@ class Settings(_Frozen):
     def _cap_covers_a_session(self):
         if self.cost_cap_usd < self.max_budget_usd:
             raise ValueError("cost_cap_usd must be at least max_budget_usd")
-        return self
-
-
-class CriterionEntry(_Frozen):
-    criterion: Criterion
-    name: str
-    level: Literal["A", "AA"]
-    type: IssueType
-    roles: list[Role] = Field(min_length=1)
-
-
-class CriteriaMatrix(_Frozen):
-    schema_version: Literal["1"]
-    status: Literal["draft", "frozen"]
-    frozen_on: str | None
-    criteria: list[CriterionEntry] = Field(min_length=1)
-
-    @model_validator(mode="after")
-    def _frozen_needs_a_date(self):
-        if (self.status == "frozen") != (self.frozen_on is not None):
-            raise ValueError("status 'frozen' requires frozen_on, and 'draft' must not have one")
         return self
 
 

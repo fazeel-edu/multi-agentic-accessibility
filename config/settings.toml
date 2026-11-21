@@ -4,7 +4,7 @@ schema_version = "1"
 thinking = "adaptive"       # Sonnet/Haiku 5.5 reject manual thinking budgets
 max_turns = 12              # loop cap per session
 max_budget_usd = 1.0        # per-session budget (draft; set from live pricing)
-cost_cap_usd = 50.0         # hard Run cap (draft, unconfirmed; AD-8 sets from live pricing)
+cost_cap_usd = 50.0         # hard cap per phase ledger (draft, unconfirmed; set from live pricing)
 
 [models.dev]
 model_id = "claude-haiku-5-5"

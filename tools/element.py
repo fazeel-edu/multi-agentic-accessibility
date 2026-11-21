@@ -107,3 +107,24 @@ def element_key(capture_html: str, selector: str | None) -> ElementKey:
         return NodeKey(path=paths[0])
     order = {canonical_path(e): i for i, e in enumerate(root.iter()) if isinstance(e.tag, str)}
     return NodesKey(paths=tuple(sorted(paths, key=order.__getitem__)))
+
+
+def element_text(capture_html: str, selector: str) -> str | None:
+    """Visible-ish text of the first element a selector resolves to; None if it resolves to none."""
+    root = _parse(capture_html)
+    if root is None or not selector.strip():
+        return None
+    try:
+        elements = _elements(root, selector.strip())
+    except (
+        SelectorError,
+        etree.LxmlError,
+        ValueError,
+        TypeError,
+        NotImplementedError,
+        RecursionError,
+    ):
+        return None
+    if not elements:
+        return None
+    return " ".join(elements[0].text_content().split())

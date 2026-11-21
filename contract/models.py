@@ -52,10 +52,20 @@ class AgentOutput(ContractModel):
     priority_notes: list[str] = Field(default_factory=list)  # synthesis; not Issues
 
 
-def issue_id(element_key: ElementKey, criterion: str | None, role: Role) -> str:
-    """Stable id: hash of element_key + criterion + role."""
+def issue_id(
+    element_key: ElementKey, criterion: str | None, role: Role, rule_id: str | None = None
+) -> str:
+    """Stable id: hash of element_key + criterion + role (+ native rule_id when given, so two
+    rules on one element with no criterion stay distinct)."""
     payload = f"{element_key.model_dump_json()}|{criterion or ''}|{role.value}"
+    if rule_id:
+        payload += f"|{rule_id}"
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+def merged_id(element_key: ElementKey, criterion: str) -> str:
+    """Stable id of a merged issue: hash of element_key + criterion."""
+    return hashlib.sha256(f"{element_key.model_dump_json()}|{criterion}".encode()).hexdigest()[:16]
 
 
 class KeyedIssue(Issue):

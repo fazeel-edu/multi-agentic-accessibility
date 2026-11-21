@@ -11,6 +11,7 @@ from contract.models import (
     Report,
     Run,
     issue_id,
+    merged_id,
 )
 
 __all__ = [
@@ -37,4 +38,5 @@ __all__ = [
     "System",
     "UnresolvedKey",
     "issue_id",
+    "merged_id",
 ]

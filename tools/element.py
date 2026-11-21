@@ -128,3 +128,13 @@ def element_text(capture_html: str, selector: str) -> str | None:
     if not elements:
         return None
     return " ".join(elements[0].text_content().split())
+
+
+def visible_text(capture_html: str) -> str:
+    """Readable text of the page: scripts, styles and hidden elements removed, whitespace collapsed."""
+    root = _parse(capture_html)
+    if root is None:
+        return ""
+    for bad in root.xpath("//script|//style|//template|//*[@hidden]"):
+        bad.getparent().remove(bad) if bad.getparent() is not None else None
+    return "\n".join(line for line in (" ".join(t.split()) for t in root.itertext()) if line)

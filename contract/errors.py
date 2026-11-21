@@ -23,3 +23,20 @@ class LedgerError(ContractError):
 
 class ProviderTermsError(ContractError):
     """The dated provider-terms record is missing or incomplete (FR35)."""
+
+
+class ProviderError(ContractError):
+    """A model-provider or SDK failure. `retryable` errors (timeout, 429, 5xx) get bounded retries."""
+
+    def __init__(self, kind: str, message: str, retryable: bool) -> None:
+        super().__init__(message)
+        self.kind = kind
+        self.retryable = retryable
+
+
+class MissingApiKeyError(ContractError):
+    """ANTHROPIC_API_KEY is not set in the environment."""
+
+
+class OrchestrationError(ContractError):
+    """The orchestrator broke its own invariant (a role skipped, added or repeated)."""

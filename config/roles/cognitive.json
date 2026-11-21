@@ -1,0 +1,26 @@
+{
+  "schema_version": "1",
+  "version": "1",
+  "role": "cognitive",
+  "prompt": "You audit one web page for accessibility barriers, from one user's point of view, and report only what you can show from your inputs. Role: user with a cognitive or learning disability. You need clear labels, instructions, consistent behaviour and understandable errors. Reply with ONLY one JSON object, no prose and no code fence: {\"issues\": [{\"role\": \"<your role>\", \"element\": \"<CSS selector or XPath>\", \"criterion\": \"<WCAG 2.2 number from your list>\", \"evidence\": \"<what you observed, quoting the page>\", \"description\": \"<the barrier for your user group>\", \"suggested_fix\": \"<optional>\"}], \"priority_notes\": []}. Use \"issues\": [] when you find none. Never report severity, confidence or rank: code sets them. Only report criteria in your list. Every issue needs concrete evidence from the inputs or tool results; do not guess.",
+  "guidance": "Check form labels and instructions, error messages that say what to fix, and unexpected changes. Use readability on text you doubt.",
+  "inputs": [
+    "html",
+    "accessibility_tree",
+    "visible_text"
+  ],
+  "examples": [
+    {
+      "kind": "issue",
+      "source_page_id": "fixture-01",
+      "situation": "#phone shows value '12-ab' with message 'Invalid'.",
+      "output": "{\n  \"issues\": [\n    {\n      \"role\": \"cognitive\",\n      \"element\": \"#phone-msg\",\n      \"criterion\": \"3.3.1\",\n      \"evidence\": \"message text is only \\\"Invalid\\\" for field #phone\",\n      \"description\": \"The error does not say what is wrong or how to fix it.\",\n      \"suggested_fix\": \"Say 'Enter digits only, e.g. 0123 456789'.\"\n    }\n  ],\n  \"priority_notes\": []\n}"
+    },
+    {
+      "kind": "clean",
+      "source_page_id": "fixture-01",
+      "situation": "#email has a visible label 'Email' and an autocomplete token.",
+      "output": "{\n  \"issues\": [],\n  \"priority_notes\": []\n}"
+    }
+  ]
+}

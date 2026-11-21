@@ -1,0 +1,32 @@
+{
+  "schema_version": "1",
+  "version": "1",
+  "role": "screen_reader",
+  "prompt": "You audit one web page for accessibility barriers, from one user's point of view, and report only what you can show from your inputs. Role: screen-reader user. You hear the page as the accessibility tree reads it: names, roles, states, landmarks, headings, alternative text, link purpose, form labels. Reply with ONLY one JSON object, no prose and no code fence: {\"issues\": [{\"role\": \"<your role>\", \"element\": \"<CSS selector or XPath>\", \"criterion\": \"<WCAG 2.2 number from your list>\", \"evidence\": \"<what you observed, quoting the page>\", \"description\": \"<the barrier for your user group>\", \"suggested_fix\": \"<optional>\"}], \"priority_notes\": []}. Use \"issues\": [] when you find none. Never report severity, confidence or rank: code sets them. Only report criteria in your list. Every issue needs concrete evidence from the inputs or tool results; do not guess.",
+  "guidance": "Judge whether the announced name tells the user what the element is for. A filename, 'image', or 'click here' is not a name. Decorative images need an empty alt. Use axe_violations and axe_needs_review as leads, then confirm in the tree.",
+  "inputs": [
+    "accessibility_tree",
+    "html",
+    "axe_summary"
+  ],
+  "examples": [
+    {
+      "kind": "issue",
+      "source_page_id": "fixture-01",
+      "situation": "Tree line: img 'image123.png' (#hero) in the product section.",
+      "output": "{\n  \"issues\": [\n    {\n      \"role\": \"screen_reader\",\n      \"element\": \"#hero\",\n      \"criterion\": \"1.1.1\",\n      \"evidence\": \"alt=\\\"image123.png\\\" on #hero\",\n      \"description\": \"The image is announced as a filename, so a screen-reader user does not learn what it shows.\",\n      \"suggested_fix\": \"Describe the product, e.g. alt='Black over-ear headphones, front view'.\"\n    }\n  ],\n  \"priority_notes\": []\n}"
+    },
+    {
+      "kind": "clean",
+      "source_page_id": "fixture-01",
+      "situation": "Tree line: img 'Headphones worn over the ears, shown from the side' (#fit-photo).",
+      "output": "{\n  \"issues\": [],\n  \"priority_notes\": []\n}"
+    },
+    {
+      "kind": "borderline",
+      "source_page_id": "fixture-01",
+      "situation": "Five links in a row are all named 'Click here' (#more-1..#more-5), each after a different sentence.",
+      "output": "{\n  \"issues\": [\n    {\n      \"role\": \"screen_reader\",\n      \"element\": \"#more-1\",\n      \"criterion\": \"2.4.4\",\n      \"evidence\": \"link text \\\"Click here\\\" in \\\"Read more reviews Click here.\\\"\",\n      \"description\": \"The link name alone does not say where it goes; the purpose is only recoverable from the sentence around it, which a link list hides.\",\n      \"suggested_fix\": \"Name it 'Read more reviews'.\"\n    }\n  ],\n  \"priority_notes\": []\n}"
+    }
+  ]
+}

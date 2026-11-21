@@ -126,6 +126,12 @@ class RoleStatus(_Embedded):
     role: Role
     state: RoleState
     failure: FailureRecord | None = None
+    seconds: float = 0.0
+    attempts: int = 0  # sessions started: 1, or 2 after the output-gate retry
+    schema_valid: bool | None = None  # first attempt passed the output gate (None: never judged)
+    prompt_tokens_est: int = 0  # estimate: characters / 4
+    example_count: int = 0
+    cost_usd: float = 0.0  # SDK estimate, summed over attempts
 
 
 class Usage(_Embedded):
@@ -169,6 +175,7 @@ class Run(ContractModel):
     variant: list[Role] = Field(default_factory=list)  # excluded roles (ablation)
     provider_terms_date: str | None = None
     role_status: list[RoleStatus] = Field(default_factory=list)
+    priority_notes: list[str] = Field(default_factory=list)
     usage: Usage = Field(default_factory=Usage)
     seconds: float = 0.0
     started_at: str  # ISO 8601 UTC

@@ -55,14 +55,21 @@ examples_file: prompts/screen_reader_examples.json   # 3-4 Dev Set examples: cle
 
 ## Orchestrator
 ```python
-ROLES = ["screen_reader", "keyboard", "colour_visual",
-         "cognitive", "plain_language", "wcag_structure"]
+ROLES = [
+    "screen_reader",
+    "keyboard",
+    "colour_visual",
+    "cognitive",
+    "plain_language",
+    "wcag_structure",
+]
+
 
 def audit(page):
-    capture = load_capture(page)                      # cached
+    capture = load_capture(page)  # cached
     findings = parallel(run_role(r, capture, ROLE_SPEC[r]) for r in ROLES)
     findings.append(run_synthesis(capture, findings))  # after all six finish or fail
-    return rank(map_to_wcag(dedupe(findings)))         # deterministic; sets confidence
+    return rank(map_to_wcag(dedupe(findings)))  # deterministic; sets confidence
 ```
 
 ## Issue Schema (draft, revised)

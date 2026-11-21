@@ -21,3 +21,13 @@ Pinned versions and verification date: `docs/pins.md`.
 ```
 uv run systemc capture data/pages/fixture-01.html   # writes data/captures/{page_id}/{capture_hash}/
 ```
+
+## System C audit (Epic 2)
+
+```
+export ANTHROPIC_API_KEY=...        # environment only, never a file
+# fill in config/provider_terms.md (Read on: YYYY-MM-DD plus three topics)
+uv run systemc capture data/pages/fixture-01.html
+uv run systemc audit fixture-01      # prints a cost estimate, runs 6 roles + synthesis, stores the Run
+uv run pytest tests/test_sdk_live.py -s   # Story 2.1 live checks (paid, small)
+```

@@ -63,6 +63,21 @@
     "RoleStatus": {
       "additionalProperties": false,
       "properties": {
+        "attempts": {
+          "default": 0,
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "cost_usd": {
+          "default": 0.0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "example_count": {
+          "default": 0,
+          "title": "Example Count",
+          "type": "integer"
+        },
         "failure": {
           "anyOf": [
             {
@@ -74,8 +89,30 @@
           ],
           "default": null
         },
+        "prompt_tokens_est": {
+          "default": 0,
+          "title": "Prompt Tokens Est",
+          "type": "integer"
+        },
         "role": {
           "$ref": "#/$defs/Role"
+        },
+        "schema_valid": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schema Valid"
+        },
+        "seconds": {
+          "default": 0.0,
+          "title": "Seconds",
+          "type": "number"
         },
         "state": {
           "$ref": "#/$defs/RoleState"
@@ -165,6 +202,13 @@
     },
     "phase": {
       "$ref": "#/$defs/Phase"
+    },
+    "priority_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Priority Notes",
+      "type": "array"
     },
     "provider_terms_date": {
       "anyOf": [

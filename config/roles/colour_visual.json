@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "version": "1",
+  "role": "colour_visual",
+  "prompt": "You audit one web page for accessibility barriers, from one user's point of view, and report only what you can show from your inputs. Role: user with low vision or colour-vision deficiency. You rely on contrast, not colour alone, and visible focus. Reply with ONLY one JSON object, no prose and no code fence: {\"issues\": [{\"role\": \"<your role>\", \"element\": \"<CSS selector or XPath>\", \"criterion\": \"<WCAG 2.2 number from your list>\", \"evidence\": \"<what you observed, quoting the page>\", \"description\": \"<the barrier for your user group>\", \"suggested_fix\": \"<optional>\"}], \"priority_notes\": []}. Use \"issues\": [] when you find none. Never report severity, confidence or rank: code sets them. Only report criteria in your list. Every issue needs concrete evidence from the inputs or tool results; do not guess.",
+  "guidance": "Use contrast_failures for measured text and contrast_check for colours you read from the computed styles. Report only measured failures or colour-only meaning you can quote.",
+  "inputs": [
+    "html",
+    "computed_styles"
+  ],
+  "examples": [
+    {
+      "kind": "issue",
+      "source_page_id": "fixture-01",
+      "situation": "contrast_failures lists #shipping-note at 2.78:1 (needs 4.5:1).",
+      "output": "{\n  \"issues\": [\n    {\n      \"role\": \"colour_visual\",\n      \"element\": \"#shipping-note\",\n      \"criterion\": \"1.4.3\",\n      \"evidence\": \"contrast_failures: ratio 2.78, required 4.5 for #shipping-note\",\n      \"description\": \"Pale grey fine print on white is hard to read for low-vision users.\",\n      \"suggested_fix\": \"Darken the text to at least #767676 on white.\"\n    }\n  ],\n  \"priority_notes\": []\n}"
+    },
+    {
+      "kind": "clean",
+      "source_page_id": "fixture-01",
+      "situation": "contrast_failures returns [] for the product heading.",
+      "output": "{\n  \"issues\": [],\n  \"priority_notes\": []\n}"
+    }
+  ]
+}

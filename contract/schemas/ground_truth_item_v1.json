@@ -1,0 +1,203 @@
+{
+  "$defs": {
+    "IssueType": {
+      "description": "Criterion type: rule-checkable, judgement, mixed.",
+      "enum": [
+        "R",
+        "J",
+        "M"
+      ],
+      "title": "IssueType",
+      "type": "string"
+    },
+    "NodeKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "node",
+          "default": "node",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "NodeKey",
+      "type": "object"
+    },
+    "NodesKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "nodes",
+          "default": "nodes",
+          "title": "Kind",
+          "type": "string"
+        },
+        "paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "title": "NodesKey",
+      "type": "object"
+    },
+    "PageKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "page",
+          "default": "page",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "PageKey",
+      "type": "object"
+    },
+    "Role": {
+      "enum": [
+        "screen_reader",
+        "keyboard",
+        "colour_visual",
+        "cognitive",
+        "plain_language",
+        "wcag_structure",
+        "inclusive_design",
+        "axe_core"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "Scope": {
+      "enum": [
+        "element",
+        "page"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "Severity": {
+      "description": "Closed ordinal scale; higher is worse. Set by code, never by an agent.",
+      "enum": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "title": "Severity",
+      "type": "integer"
+    },
+    "UnresolvedKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "unresolved",
+          "default": "unresolved",
+          "title": "Kind",
+          "type": "string"
+        },
+        "raw": {
+          "title": "Raw",
+          "type": "string"
+        }
+      },
+      "required": [
+        "raw"
+      ],
+      "title": "UnresolvedKey",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "acceptable_criteria": {
+      "items": {
+        "pattern": "^\\d\\.\\d{1,2}\\.\\d{1,2}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Acceptable Criteria",
+      "type": "array"
+    },
+    "affected_user_group": {
+      "$ref": "#/$defs/Role"
+    },
+    "element_key": {
+      "discriminator": {
+        "mapping": {
+          "node": "#/$defs/NodeKey",
+          "nodes": "#/$defs/NodesKey",
+          "page": "#/$defs/PageKey",
+          "unresolved": "#/$defs/UnresolvedKey"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NodeKey"
+        },
+        {
+          "$ref": "#/$defs/NodesKey"
+        },
+        {
+          "$ref": "#/$defs/PageKey"
+        },
+        {
+          "$ref": "#/$defs/UnresolvedKey"
+        }
+      ],
+      "title": "Element Key"
+    },
+    "expected_roles": {
+      "items": {
+        "$ref": "#/$defs/Role"
+      },
+      "title": "Expected Roles",
+      "type": "array"
+    },
+    "issue_type": {
+      "$ref": "#/$defs/IssueType"
+    },
+    "page_id": {
+      "title": "Page Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/Scope",
+      "default": "element"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    }
+  },
+  "required": [
+    "page_id",
+    "element_key",
+    "acceptable_criteria",
+    "affected_user_group",
+    "severity",
+    "issue_type"
+  ],
+  "title": "GroundTruthItem",
+  "type": "object"
+}

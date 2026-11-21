@@ -1,0 +1,381 @@
+{
+  "$defs": {
+    "FailureRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "kind",
+        "message",
+        "retryable"
+      ],
+      "title": "FailureRecord",
+      "type": "object"
+    },
+    "MergedIssue": {
+      "additionalProperties": false,
+      "description": "De-duplicated Issue; every field here except text is set by code.",
+      "properties": {
+        "confidence": {
+          "maximum": 6,
+          "minimum": 1,
+          "title": "Confidence",
+          "type": "integer"
+        },
+        "criterion": {
+          "pattern": "^\\d\\.\\d{1,2}\\.\\d{1,2}$",
+          "title": "Criterion",
+          "type": "string"
+        },
+        "derived_from": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Derived From",
+          "type": "array"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "element_key": {
+          "discriminator": {
+            "mapping": {
+              "node": "#/$defs/NodeKey",
+              "nodes": "#/$defs/NodesKey",
+              "page": "#/$defs/PageKey",
+              "unresolved": "#/$defs/UnresolvedKey"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NodeKey"
+            },
+            {
+              "$ref": "#/$defs/NodesKey"
+            },
+            {
+              "$ref": "#/$defs/PageKey"
+            },
+            {
+              "$ref": "#/$defs/UnresolvedKey"
+            }
+          ],
+          "title": "Element Key"
+        },
+        "evidence": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "grounded": {
+          "title": "Grounded",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/$defs/Role"
+          },
+          "minItems": 1,
+          "title": "Roles",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "suggested_fix": {
+          "default": "",
+          "title": "Suggested Fix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "element_key",
+        "criterion",
+        "roles",
+        "confidence",
+        "severity",
+        "rank",
+        "grounded",
+        "evidence",
+        "description"
+      ],
+      "title": "MergedIssue",
+      "type": "object"
+    },
+    "NodeKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "node",
+          "default": "node",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "NodeKey",
+      "type": "object"
+    },
+    "NodesKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "nodes",
+          "default": "nodes",
+          "title": "Kind",
+          "type": "string"
+        },
+        "paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "title": "NodesKey",
+      "type": "object"
+    },
+    "PageKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "page",
+          "default": "page",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "PageKey",
+      "type": "object"
+    },
+    "Phase": {
+      "enum": [
+        "dev",
+        "eval"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "Role": {
+      "enum": [
+        "screen_reader",
+        "keyboard",
+        "colour_visual",
+        "cognitive",
+        "plain_language",
+        "wcag_structure",
+        "inclusive_design",
+        "axe_core"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "RoleState": {
+      "enum": [
+        "ok",
+        "failed",
+        "excluded"
+      ],
+      "title": "RoleState",
+      "type": "string"
+    },
+    "RoleStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "failure": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FailureRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "state": {
+          "$ref": "#/$defs/RoleState"
+        }
+      },
+      "required": [
+        "role",
+        "state"
+      ],
+      "title": "RoleStatus",
+      "type": "object"
+    },
+    "Severity": {
+      "description": "Closed ordinal scale; higher is worse. Set by code, never by an agent.",
+      "enum": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "title": "Severity",
+      "type": "integer"
+    },
+    "System": {
+      "enum": [
+        "axe",
+        "role_multi_agent"
+      ],
+      "title": "System",
+      "type": "string"
+    },
+    "UnresolvedKey": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "unresolved",
+          "default": "unresolved",
+          "title": "Kind",
+          "type": "string"
+        },
+        "raw": {
+          "title": "Raw",
+          "type": "string"
+        }
+      },
+      "required": [
+        "raw"
+      ],
+      "title": "UnresolvedKey",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cannot_test_statement": {
+      "minLength": 1,
+      "title": "Cannot Test Statement",
+      "type": "string"
+    },
+    "capture_hash": {
+      "title": "Capture Hash",
+      "type": "string"
+    },
+    "config_hash": {
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "group_id": {
+      "title": "Group Id",
+      "type": "string"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/MergedIssue"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "page_id": {
+      "title": "Page Id",
+      "type": "string"
+    },
+    "phase": {
+      "$ref": "#/$defs/Phase"
+    },
+    "postprocess_version": {
+      "title": "Postprocess Version",
+      "type": "string"
+    },
+    "priority_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Priority Notes",
+      "type": "array"
+    },
+    "role_status": {
+      "items": {
+        "$ref": "#/$defs/RoleStatus"
+      },
+      "title": "Role Status",
+      "type": "array"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "system": {
+      "$ref": "#/$defs/System"
+    }
+  },
+  "required": [
+    "run_id",
+    "system",
+    "page_id",
+    "phase",
+    "group_id",
+    "capture_hash",
+    "config_hash",
+    "postprocess_version",
+    "role_status",
+    "cannot_test_statement"
+  ],
+  "title": "Report",
+  "type": "object"
+}

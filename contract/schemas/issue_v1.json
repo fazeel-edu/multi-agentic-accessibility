@@ -1,0 +1,97 @@
+{
+  "$defs": {
+    "Role": {
+      "enum": [
+        "screen_reader",
+        "keyboard",
+        "colour_visual",
+        "cognitive",
+        "plain_language",
+        "wcag_structure",
+        "inclusive_design",
+        "axe_core"
+      ],
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What an agent or adapter reports. No code-set fields allowed.",
+  "properties": {
+    "criterion": {
+      "anyOf": [
+        {
+          "pattern": "^\\d\\.\\d{1,2}\\.\\d{1,2}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Criterion"
+    },
+    "derived_from": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Derived From",
+      "type": "array"
+    },
+    "description": {
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+    },
+    "element": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Element"
+    },
+    "evidence": {
+      "minLength": 1,
+      "title": "Evidence",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    },
+    "rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rule Id"
+    },
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "suggested_fix": {
+      "default": "",
+      "title": "Suggested Fix",
+      "type": "string"
+    }
+  },
+  "required": [
+    "role",
+    "evidence",
+    "description"
+  ],
+  "title": "Issue",
+  "type": "object"
+}

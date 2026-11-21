@@ -1,11 +1,26 @@
 """Capture models and the capture_hash rule (AD-3). Pure; no I/O."""
 
 import hashlib
-from typing import Any
+import re
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, StringConstraints
 
-from contract.models import ContractModel, NonEmpty
+from contract.models import ContractModel
+
+PAGE_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]*$"  # no separators, no leading dot
+CAPTURE_HASH_PATTERN = r"^[0-9a-f]{64}$"
+PageId = Annotated[str, StringConstraints(pattern=PAGE_ID_PATTERN)]
+CaptureHash = Annotated[str, StringConstraints(pattern=CAPTURE_HASH_PATTERN)]
+
+
+def is_valid_page_id(value: str) -> bool:
+    return re.fullmatch(PAGE_ID_PATTERN, value) is not None
+
+
+def is_valid_capture_hash(value: str) -> bool:
+    return re.fullmatch(CAPTURE_HASH_PATTERN, value) is not None
+
 
 # Artifact file names inside a Capture directory.
 HTML = "page.html"
@@ -33,8 +48,8 @@ class ArtifactEntry(BaseModel):
 class CaptureManifest(ContractModel):
     """Contents of capture.json: every artifact plus tool and focus-script versions."""
 
-    page_id: NonEmpty
-    capture_hash: str = Field(min_length=64, max_length=64)
+    page_id: PageId
+    capture_hash: CaptureHash
     source: str  # page file name only, no local path
     viewport: tuple[int, int]
     artifacts: list[ArtifactEntry]

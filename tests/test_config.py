@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -88,3 +89,49 @@ def test_duplicate_criterion_rejected(cfg_dir):
     p.write_text(json.dumps(data))
     with pytest.raises(ConfigError):
         store_config.load(cfg_dir)
+
+
+def test_frozen_matrix_needs_a_date_and_draft_must_not_have_one(cfg_dir):
+    p = cfg_dir / "criteria_matrix.json"
+    data = json.loads(p.read_text())
+    for status, frozen_on in (("frozen", None), ("draft", "2026-12-01")):
+        p.write_text(json.dumps({**data, "status": status, "frozen_on": frozen_on}))
+        with pytest.raises(ConfigError):
+            store_config.load(cfg_dir)
+    p.write_text(json.dumps({**data, "status": "frozen", "frozen_on": "2026-12-01"}))
+    assert store_config.load(cfg_dir).config.matrix.status == "frozen"
+
+
+def test_cost_cap_must_cover_one_session_and_be_finite(cfg_dir):
+    path = cfg_dir / "settings.toml"
+    text = path.read_text()
+    path.write_text(text.replace("cost_cap_usd = 50.0", "cost_cap_usd = 0.5"))
+    with pytest.raises(ConfigError):
+        store_config.load(cfg_dir)
+    path.write_text(text.replace("cost_cap_usd = 50.0", "cost_cap_usd = inf"))
+    with pytest.raises(ConfigError):
+        store_config.load(cfg_dir)
+
+
+def test_invalid_utf8_is_a_config_error(cfg_dir):
+    (cfg_dir / "settings.toml").write_bytes(b"\xff\xfe\x00bad")
+    with pytest.raises(ConfigError):
+        store_config.load(cfg_dir)
+
+
+def test_only_the_top_level_package_marker_is_ignored_by_the_hash(cfg_dir):
+    before = store_config.load(cfg_dir).config_hash
+    (cfg_dir / "__init__.py").write_text("")
+    assert store_config.load(cfg_dir).config_hash == before
+    (cfg_dir / "role_specs").mkdir()
+    (cfg_dir / "role_specs" / "__init__.py").write_text("")
+    assert store_config.load(cfg_dir).config_hash != before
+
+
+def test_every_role_agent_has_criteria_in_the_matrix():
+    from contract.enums import Role
+
+    covered = {r for c in store_config.load().config.matrix.criteria for r in c.roles}
+    agents = set(Role) - {Role.INCLUSIVE_DESIGN, Role.AXE_CORE}  # synthesis and axe have none
+    assert agents <= covered
+    assert "1.4.10" not in {c.criterion for c in store_config.load().config.matrix.criteria}

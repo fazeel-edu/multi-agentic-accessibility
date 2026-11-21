@@ -4,19 +4,20 @@ import hashlib
 import json
 import tomllib
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from contract.enums import IssueType, Phase, Role
 from contract.errors import ConfigError
+from contract.models import Criterion
 from store.paths import CONFIG_DIR
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
-Criterion = Annotated[str, StringConstraints(pattern=r"^\d\.\d{1,2}\.\d{1,2}$")]
 
-# Files in config/ that are code or noise, not configuration.
-_IGNORED_NAMES = {"__init__.py", ".DS_Store"}
+# Noise, not configuration: the package marker at the top level, OS files, bytecode.
+_IGNORED_TOP_LEVEL = {"__init__.py"}
+_IGNORED_NAMES = {".DS_Store"}
 _IGNORED_DIRS = {"__pycache__"}
 
 
@@ -39,9 +40,15 @@ class Settings(_Frozen):
     schema_version: Literal["1"]
     thinking: Literal["adaptive"]
     max_turns: int = Field(gt=0)
-    max_budget_usd: float = Field(gt=0)  # per session
-    cost_cap_usd: float = Field(gt=0)  # whole Run
+    max_budget_usd: float = Field(gt=0, allow_inf_nan=False)  # per session
+    cost_cap_usd: float = Field(gt=0, allow_inf_nan=False)  # whole Run
     models: Models
+
+    @model_validator(mode="after")
+    def _cap_covers_a_session(self):
+        if self.cost_cap_usd < self.max_budget_usd:
+            raise ValueError("cost_cap_usd must be at least max_budget_usd")
+        return self
 
 
 class CriterionEntry(_Frozen):
@@ -57,6 +64,12 @@ class CriteriaMatrix(_Frozen):
     status: Literal["draft", "frozen"]
     frozen_on: str | None
     criteria: list[CriterionEntry] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _frozen_needs_a_date(self):
+        if (self.status == "frozen") != (self.frozen_on is not None):
+            raise ValueError("status 'frozen' requires frozen_on, and 'draft' must not have one")
+        return self
 
 
 class Config(_Frozen):
@@ -78,6 +91,7 @@ def _hashed_files(config_dir: Path) -> list[Path]:
         for p in config_dir.rglob("*")
         if p.is_file()
         and p.name not in _IGNORED_NAMES
+        and p.relative_to(config_dir).parts not in {(n,) for n in _IGNORED_TOP_LEVEL}
         and not _IGNORED_DIRS & set(p.relative_to(config_dir).parts)
     )
 
@@ -102,11 +116,19 @@ def load(config_dir: Path = CONFIG_DIR) -> LoadedConfig:
         matrix = CriteriaMatrix.model_validate(
             json.loads((config_dir / "criteria_matrix.json").read_text(encoding="utf-8"))
         )
-    except (OSError, tomllib.TOMLDecodeError, json.JSONDecodeError, ValidationError) as exc:
+    except (
+        OSError,
+        UnicodeDecodeError,
+        tomllib.TOMLDecodeError,
+        json.JSONDecodeError,
+        ValidationError,
+    ) as exc:
         raise ConfigError(f"invalid config in {config_dir}: {exc}") from exc
     ids = [c.criterion for c in matrix.criteria]
     if len(ids) != len(set(ids)):
         raise ConfigError("criteria_matrix.json lists a criterion twice")
-    return LoadedConfig(
-        config=Config(settings=settings, matrix=matrix), config_hash=config_hash(config_dir)
-    )
+    try:
+        digest = config_hash(config_dir)
+    except OSError as exc:
+        raise ConfigError(f"cannot hash config in {config_dir}: {exc}") from exc
+    return LoadedConfig(config=Config(settings=settings, matrix=matrix), config_hash=digest)

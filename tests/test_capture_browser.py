@@ -1,5 +1,7 @@
 """Integration tests that drive real Chromium. Skipped when the browser is not installed."""
 
+import json
+import os
 import socket
 from pathlib import Path
 
@@ -26,7 +28,11 @@ def _browser_available() -> bool:
         return False
 
 
-pytestmark = pytest.mark.skipif(not _browser_available(), reason="Chromium not installed")
+# Set REQUIRE_BROWSER=1 (for example in CI) to make a missing Chromium a failure, not a skip.
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("REQUIRE_BROWSER") and not _browser_available(),
+    reason="Chromium not installed",
+)
 
 
 @pytest.fixture(scope="module")
@@ -131,7 +137,7 @@ def test_focus_trace_shows_focus_hidden_behind_sticky_header(captured):
 
 def test_dialog_probe_shows_focus_not_moved_into_dialog(captured):
     _, _, cap = captured
-    opened = [p for p in cap.focus_trace["dialog_probes"] if p["opened"]]
+    opened = [p for p in cap.focus_trace["dialogs"]["probes"] if p["opened"]]
     assert len(opened) == 1
     probe = opened[0]
     assert probe["dialog"] == element_key(cap.html, "#size-guide").path
@@ -142,3 +148,77 @@ def test_dialog_probe_shows_focus_not_moved_into_dialog(captured):
 def test_missing_page_raises(tmp_path):
     with pytest.raises(sc.CaptureError):
         capture_page(tmp_path / "none.html", root=tmp_path)
+
+
+def test_focus_trace_records_why_each_pass_ended(captured):
+    _, _, cap = captured
+    assert cap.focus_trace["script_version"] == "2"
+    assert cap.focus_trace["tab_forward_end"] in {"left_document", "revisit", "cap"}
+    assert cap.focus_trace["tab_backward_end"] in {"left_document", "revisit", "cap"}
+    assert cap.focus_trace["dialogs"]["candidates"] == cap.focus_trace["dialogs"]["probed"] == 1
+
+
+def test_focus_trace_never_stores_typed_values(tmp_path):
+    page = tmp_path / "typed.html"
+    page.write_text(
+        '<!DOCTYPE html><html lang="en"><head><title>t</title></head><body><main>'
+        '<label for="pw">Password</label><input id="pw" type="password" value="hunter2-secret">'
+        '<input id="go" type="submit" value="Sign in"></main></body></html>'
+    )
+    manifest = capture_page(page, root=tmp_path / "c")
+    cap = sc.read_capture(manifest.page_id, manifest.capture_hash, tmp_path / "c")
+    text = json.dumps(cap.focus_trace)
+    assert "hunter2-secret" not in text
+    assert "Sign in" in text  # button-like input labels are kept
+
+
+def test_files_outside_the_page_folder_are_blocked(tmp_path):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.png").write_bytes(b"x")
+    pages = tmp_path / "pages"
+    pages.mkdir()
+    page = pages / "p.html"
+    page.write_text(
+        f'<!DOCTYPE html><html lang="en"><head><title>t</title></head><body><main>'
+        f'<img src="file://{outside}/secret.png" alt="x"></main></body></html>'
+    )
+    assert (
+        capture_page(page, root=tmp_path / "c").blocked_requests >= 1
+    )  # counted once per page load
+
+
+def test_a_navigating_button_does_not_abort_the_capture(tmp_path):
+    page = tmp_path / "nav.html"
+    page.write_text(
+        '<!DOCTYPE html><html lang="en"><head><title>t</title></head><body><main>'
+        '<button type="button" onclick="location.href=\'about:blank\'">Go</button>'
+        "</main></body></html>"
+    )
+    manifest = capture_page(page, root=tmp_path / "c")
+    cap = sc.read_capture(manifest.page_id, manifest.capture_hash, tmp_path / "c")
+    assert cap.focus_trace["dialogs"]["probed"] == 1
+
+
+def test_axe_version_mismatch_is_rejected(tmp_path, monkeypatch):
+    import capture.capture as module
+
+    monkeypatch.setattr(module, "AXE_VERSION", "0.0.0")
+    with pytest.raises(sc.CaptureError, match="axe version"):
+        capture_page(FIXTURE, root=tmp_path)
+    assert not list(tmp_path.rglob("capture.json"))
+
+
+def test_path_mismatch_between_browser_and_tools_is_rejected(tmp_path, monkeypatch):
+    import capture.capture as module
+
+    monkeypatch.setattr(module, "element_key", lambda html, path: module.NodeKey(path=path + "x"))
+    with pytest.raises(sc.CaptureError, match="do not match tools.element"):
+        capture_page(FIXTURE, root=tmp_path)
+
+
+@pytest.mark.parametrize("bad", ["../escape", "a/b", ".hidden", "/abs"])
+def test_invalid_page_id_is_rejected_before_any_browser_work(tmp_path, bad):
+    with pytest.raises(sc.CaptureError, match="invalid page_id"):
+        capture_page(FIXTURE, page_id=bad, root=tmp_path)
+    assert not list(tmp_path.rglob("*"))

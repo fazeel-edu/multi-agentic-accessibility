@@ -2,7 +2,7 @@
 title: 'Story 1.4: T1-T9 fixture page'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 

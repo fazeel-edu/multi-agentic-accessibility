@@ -102,3 +102,12 @@ def _order():
 
 
 FIXTURE_ORDER = _order()
+
+
+def test_xpath_forms_without_a_leading_slash_are_understood():
+    assert element_key(FIXTURE, "descendant::img[@id='hero']") == element_key(FIXTURE, "#hero")
+
+
+def test_lone_surrogates_do_not_raise():
+    assert isinstance(element_key("<p>\ud800</p>", "p"), NodeKey)
+    assert isinstance(element_key(FIXTURE, "\ud800"), UnresolvedKey)

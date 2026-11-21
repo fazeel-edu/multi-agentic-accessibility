@@ -2,7 +2,7 @@
 title: 'Story 1.3: Store, Config loader and Config hash'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 

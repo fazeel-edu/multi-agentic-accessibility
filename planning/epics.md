@@ -362,6 +362,7 @@ So that every system produces the same Report shape.
 **When** `postprocess.run` executes
 **Then** criteria are assigned only here (native `rule_id` expands through the Matrix), duplicates merge on `(element_key, criterion)`, and `confidence` equals the count of distinct reporting roles excluding synthesis echoes (FR16, AD-10)
 **And** each Issue has severity, rank and `grounded`; the ranking rule is documented and unit-tested (FR17)
+**And** issues with no criterion after mapping go to `Report.unmapped_issues`, kept for review and excluded from matching, ranking and Confidence
 **And** the Report includes the "what the system cannot test" statement (FR18).
 
 ### Story 2.9: Run storage and the audit command

@@ -26,7 +26,8 @@ ALLOWED: dict[str, set[str]] = {
     "config": set(),
     "tools": {"contract"},
     "store": {"contract"},
-    "capture": {"store", "contract"},
+    # capture checks its browser-side paths with tools.element (one documented spine deviation)
+    "capture": {"store", "contract", "tools.element"},
     "auditors": {"tools", "store", "contract"},
     "postprocess": {"tools.element", "contract"},
     "eval": {"tools.element", "contract", "store"},

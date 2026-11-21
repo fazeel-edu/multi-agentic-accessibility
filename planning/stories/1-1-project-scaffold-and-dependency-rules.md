@@ -2,7 +2,7 @@
 title: 'Story 1.1: Project scaffold and dependency rules'
 type: 'chore'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 review_loop_iteration: 0
 context:

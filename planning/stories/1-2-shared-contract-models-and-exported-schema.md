@@ -2,7 +2,7 @@
 title: 'Story 1.2: Shared contract models and exported schema'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 

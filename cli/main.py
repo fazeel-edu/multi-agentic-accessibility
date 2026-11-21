@@ -11,6 +11,11 @@ def _capture(args: argparse.Namespace) -> int:
     from capture.capture import capture_page  # imported late: starts no browser until used
 
     manifest = capture_page(Path(args.page), args.page_id)
+    if manifest.blocked_requests:
+        sys.stderr.write(
+            f"warning: {manifest.blocked_requests} remote or out-of-folder requests were blocked; "
+            "the capture may be degraded\n"
+        )
     sys.stdout.write(f"{manifest.page_id} {manifest.capture_hash}\n")
     return 0
 

@@ -2,8 +2,9 @@
 
 import json
 
-FOCUS_SCRIPT_VERSION = "1"
+FOCUS_SCRIPT_VERSION = "2"
 MAX_TAB_STEPS = 120
+MAX_DIALOG_OPENERS = 20
 
 # Shared helper: canonical path, identical in scheme to tools.element.canonical_path.
 _PATH = """
@@ -122,6 +123,8 @@ FOCUS_STATE = (
     + _PATH
     + """
   const el = document.activeElement;
+  // Never store what a user typed: only the label of button-like inputs.
+  const shownValue = (e) => (e.tagName === 'INPUT' && ['submit', 'button', 'reset'].includes(e.type) ? e.value : '');
   if (!el || el === document.body || el === document.documentElement) { resolve(null); return; }
   const r = el.getBoundingClientRect();
   const cs = getComputedStyle(el);
@@ -137,7 +140,7 @@ FOCUS_STATE = (
   const outline = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0;
   resolve({
     path: cpath(el), tag: el.tagName.toLowerCase(), id: el.id || null,
-    name: (el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || el.value || '').trim().slice(0, 60),
+    name: (el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || shownValue(el)).trim().slice(0, 60),
     rect_in_viewport: [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)],
     in_viewport: r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw,
     focus_indicator: outline ? 'outline' : (cs.boxShadow !== 'none' ? 'box-shadow' : 'none'),
@@ -167,6 +170,6 @@ CANDIDATE_OPENERS = (
   return [...document.querySelectorAll('button:not([type=submit]):not([disabled]), [role=button]')]
     .filter((b) => !b.closest('[role=dialog], [role=alertdialog], dialog'))
     .filter((b) => { const s = getComputedStyle(b); return s.display !== 'none' && s.visibility !== 'hidden'; })
-    .slice(0, 20).map(cpath);
+    .map(cpath);
 }"""
 )

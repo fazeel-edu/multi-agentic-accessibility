@@ -215,3 +215,47 @@ def test_issue_schema_has_no_code_set_fields():
         props
     )
     assert "schema_version" in props
+
+
+def test_report_keeps_unmapped_issues_apart_from_merged_issues():
+    unmapped = KeyedIssue.model_validate(
+        {
+            **agent_issue(),
+            "element_key": {"kind": "page"},
+            "id": "abc",
+        }
+    )
+    report = Report.model_validate(
+        {
+            "run_id": "r",
+            "system": "axe",
+            "page_id": "p",
+            "phase": "dev",
+            "group_id": "g",
+            "capture_hash": "c",
+            "config_hash": "h",
+            "postprocess_version": "1",
+            "role_status": [],
+            "cannot_test_statement": "x",
+            "unmapped_issues": [unmapped.model_dump(mode="json")],
+        }
+    )
+    assert report.issues == [] and report.unmapped_issues[0].criterion is None
+
+
+def test_capture_manifest_ids_are_constrained():
+    from contract.capture import CaptureManifest
+
+    base = {
+        "page_id": "p-01",
+        "capture_hash": "a" * 64,
+        "source": "p.html",
+        "viewport": (1, 1),
+        "artifacts": [],
+        "versions": {},
+        "created_at": "t",
+    }
+    assert CaptureManifest.model_validate(base)
+    for bad in ({"page_id": "../x"}, {"capture_hash": "g" * 64}, {"capture_hash": "a" * 63}):
+        with pytest.raises(ValidationError):
+            CaptureManifest.model_validate({**base, **bad})

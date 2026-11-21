@@ -29,6 +29,119 @@
       "title": "FailureRecord",
       "type": "object"
     },
+    "KeyedIssue": {
+      "additionalProperties": false,
+      "description": "An Issue after code resolved its element (stored in issues.jsonl).",
+      "properties": {
+        "criterion": {
+          "anyOf": [
+            {
+              "pattern": "^\\d\\.\\d{1,2}\\.\\d{1,2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Criterion"
+        },
+        "derived_from": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Derived From",
+          "type": "array"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "element": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Element"
+        },
+        "element_key": {
+          "discriminator": {
+            "mapping": {
+              "node": "#/$defs/NodeKey",
+              "nodes": "#/$defs/NodesKey",
+              "page": "#/$defs/PageKey",
+              "unresolved": "#/$defs/UnresolvedKey"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NodeKey"
+            },
+            {
+              "$ref": "#/$defs/NodesKey"
+            },
+            {
+              "$ref": "#/$defs/PageKey"
+            },
+            {
+              "$ref": "#/$defs/UnresolvedKey"
+            }
+          ],
+          "title": "Element Key"
+        },
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule Id"
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "suggested_fix": {
+          "default": "",
+          "title": "Suggested Fix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "evidence",
+        "description",
+        "element_key",
+        "id"
+      ],
+      "title": "KeyedIssue",
+      "type": "object"
+    },
     "MergedIssue": {
       "additionalProperties": false,
       "description": "De-duplicated Issue; every field here except text is set by code.",
@@ -362,6 +475,13 @@
     },
     "system": {
       "$ref": "#/$defs/System"
+    },
+    "unmapped_issues": {
+      "items": {
+        "$ref": "#/$defs/KeyedIssue"
+      },
+      "title": "Unmapped Issues",
+      "type": "array"
     }
   },
   "required": [

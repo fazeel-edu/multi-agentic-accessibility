@@ -177,3 +177,6 @@ class Report(ContractModel):
     cannot_test_statement: NonEmpty
     priority_notes: list[str] = Field(default_factory=list)
     issues: list[MergedIssue] = Field(default_factory=list)
+    # Issues with no criterion after mapping: kept for review, excluded from matching,
+    # ranking and Confidence.
+    unmapped_issues: list[KeyedIssue] = Field(default_factory=list)

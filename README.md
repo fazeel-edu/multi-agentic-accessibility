@@ -8,7 +8,7 @@ Role-based multi-agent accessibility audit (System C) compared with an axe-core 
 uv sync
 uv run playwright install chromium   # once; Capture and browser tests need it
 git config core.hooksPath .githooks   # secret-blocking pre-commit
-uv run pytest
+uv run pytest                        # REQUIRE_BROWSER=1 makes a missing Chromium fail, not skip
 uv run ruff check .
 ```
 

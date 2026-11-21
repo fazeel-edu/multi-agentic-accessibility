@@ -18,7 +18,15 @@ class CaptureError(ContractError):
     """A Capture is missing, incomplete or fails its integrity check."""
 
 
+def _check_id(page_id: str, capture_hash: str | None = None) -> None:
+    if not cap.is_valid_page_id(page_id):
+        raise CaptureError(f"invalid page_id {page_id!r}: use letters, digits, '.', '_', '-'")
+    if capture_hash is not None and not cap.is_valid_capture_hash(capture_hash):
+        raise CaptureError(f"invalid capture_hash {capture_hash!r}")
+
+
 def capture_dir(page_id: str, capture_hash: str, root: Path = CAPTURES_DIR) -> Path:
+    _check_id(page_id, capture_hash)
     return root / page_id / capture_hash
 
 
@@ -34,6 +42,7 @@ def write_capture(
     root: Path = CAPTURES_DIR,
 ) -> CaptureManifest:
     """Write a Capture once. An existing Capture with the same hash is left untouched."""
+    _check_id(page_id)
     missing = set(cap.ALL_ARTIFACTS) - set(files)
     if missing:
         raise CaptureError(f"capture is missing artifacts: {sorted(missing)}")
@@ -65,6 +74,9 @@ def write_capture(
         for name in cap.ALL_ARTIFACTS:
             (staging / name).write_bytes(files[name])
         (staging / MANIFEST).write_text(manifest.model_dump_json(indent=2) + "\n", encoding="utf-8")
+        if (target / MANIFEST).exists():  # a concurrent writer finished first: keep theirs
+            shutil.rmtree(staging, ignore_errors=True)
+            return read_manifest(page_id, capture_hash, root)
         if target.exists():  # leftover of an interrupted write: no manifest, so not a Capture
             shutil.rmtree(target)
         os.replace(staging, target)
@@ -84,16 +96,23 @@ def read_manifest(page_id: str, capture_hash: str, root: Path = CAPTURES_DIR) ->
 
 def capture_hashes(page_id: str, root: Path = CAPTURES_DIR) -> list[str]:
     """Hashes of all complete Captures stored for a page."""
+    _check_id(page_id)
     base = root / page_id
     if not base.is_dir():
         return []
-    return sorted(p.name for p in base.iterdir() if (p / MANIFEST).is_file())
+    return sorted(
+        p.name
+        for p in base.iterdir()
+        if cap.is_valid_capture_hash(p.name) and (p / MANIFEST).is_file()
+    )
 
 
 def read_capture(page_id: str, capture_hash: str, root: Path = CAPTURES_DIR) -> Capture:
     """Load a Capture from files only, verifying every artifact against the manifest."""
     manifest = read_manifest(page_id, capture_hash, root)
     base = capture_dir(page_id, capture_hash, root)
+    if [a.name for a in manifest.artifacts] != list(cap.ALL_ARTIFACTS):
+        raise CaptureError(f"capture {capture_hash}: manifest does not list the expected artifacts")
     files: dict[str, bytes] = {}
     for entry in manifest.artifacts:
         try:

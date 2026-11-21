@@ -2,7 +2,7 @@
 title: 'Story 1.5: element_key normaliser'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Blocks key-shaped strings in staged files. Enable: git config core.hooksPath .githooks
-files=$(git diff --cached --name-only --diff-filter=ACM)
-[ -z "$files" ] && exit 0
-exec uv run python scripts/check_secrets.py $files
+# Blocks key-shaped strings in the staged content. Enable: git config core.hooksPath .githooks
+# NUL-separated so file names with spaces survive; scans the staged blob, not the working copy.
+git diff --cached --name-only -z --diff-filter=ACMR |
+  xargs -0 uv run python scripts/check_secrets.py --staged

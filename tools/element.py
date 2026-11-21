@@ -25,7 +25,8 @@ def _parse(capture_html: str) -> html.HtmlElement | None:
         return None
     try:
         # Encode so documents carrying an XML/encoding declaration still parse.
-        return html.document_fromstring(capture_html.encode("utf-8"), parser=_html_parser())
+        data = capture_html.encode("utf-8", errors="replace")
+        return html.document_fromstring(data, parser=_html_parser())
     except (etree.ParserError, etree.XMLSyntaxError):
         return None
 
@@ -51,9 +52,19 @@ def _is_xpath(selector: str) -> bool:
     return selector.startswith(_XPATH_STARTS)
 
 
+def _to_xpath(selector: str) -> str:
+    """XPath if it looks like one; else CSS, falling back to XPath when CSS cannot parse it
+    (for example `descendant::a`). Relative XPath is evaluated from the root element."""
+    if _is_xpath(selector):
+        return selector
+    try:
+        return _TRANSLATOR.css_to_xpath(selector)
+    except SelectorError:
+        return selector
+
+
 def _elements(root: html.HtmlElement, selector: str) -> list[etree._Element]:
-    xpath = selector if _is_xpath(selector) else _TRANSLATOR.css_to_xpath(selector)
-    found = root.xpath(xpath)
+    found = root.xpath(_to_xpath(selector))
     if not isinstance(found, list):  # number, boolean or string result
         return []
     elements = []
@@ -80,7 +91,14 @@ def element_key(capture_html: str, selector: str | None) -> ElementKey:
         return UnresolvedKey(raw=selector)
     try:
         elements = _elements(root, selector.strip())
-    except (SelectorError, etree.XPathError, ValueError, NotImplementedError):
+    except (
+        SelectorError,
+        etree.LxmlError,
+        ValueError,
+        TypeError,
+        NotImplementedError,
+        RecursionError,
+    ):
         return UnresolvedKey(raw=selector)
     paths = list(dict.fromkeys(canonical_path(e) for e in elements))
     if not paths:

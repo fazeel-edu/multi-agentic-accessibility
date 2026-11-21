@@ -18,7 +18,8 @@
       "level": "A",
       "type": "M",
       "roles": [
-        "screen_reader"
+        "screen_reader",
+        "wcag_structure"
       ]
     },
     {
@@ -45,15 +46,6 @@
       "name": "Contrast (Minimum)",
       "level": "AA",
       "type": "R",
-      "roles": [
-        "colour_visual"
-      ]
-    },
-    {
-      "criterion": "1.4.10",
-      "name": "Reflow",
-      "level": "AA",
-      "type": "M",
       "roles": [
         "colour_visual"
       ]
@@ -92,6 +84,17 @@
       "type": "R",
       "roles": [
         "keyboard",
+        "screen_reader",
+        "wcag_structure"
+      ]
+    },
+    {
+      "criterion": "2.4.2",
+      "name": "Page Titled",
+      "level": "A",
+      "type": "R",
+      "roles": [
+        "wcag_structure",
         "screen_reader"
       ]
     },
@@ -150,7 +153,8 @@
       "level": "A",
       "type": "R",
       "roles": [
-        "plain_language"
+        "plain_language",
+        "wcag_structure"
       ]
     },
     {
@@ -198,7 +202,8 @@
       "level": "A",
       "type": "M",
       "roles": [
-        "screen_reader"
+        "screen_reader",
+        "wcag_structure"
       ]
     }
   ]

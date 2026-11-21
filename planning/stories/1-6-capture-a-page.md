@@ -2,7 +2,7 @@
 title: 'Story 1.6: Capture a page'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 
@@ -22,3 +22,4 @@ Capture a local page once into an immutable Capture every system reads (AD-3, FR
 - Result on `fixture-01` (hash 4bc8c35f...): axe finds only `color-contrast` on `#shipping-note` (misses T4-T9, including placeholder-only label), contrast row 2.78, forward focus order as expected, dialog probe shows focus stays on the opener and Tab goes behind the dialog (T7 confirmed).
 - T8 changed: reverse Tab covers `#more-1`, `#more-2` and `#more-3` by the sticky header (5/5 points), not `#jump-terms`. Draft ground truth now lists those three for T8 (they also carry T2); `#jump-terms` became a control. Depends on this viewport and Chromium build, but ground truth binds to the pinned capture.
 - Needs a one-time `uv run playwright install chromium`; browser tests skip if Chromium is absent.
+- Code review (2026-11-21): patches applied, see `planning/reviews/epic-1-code-review.md`. Focus trace is now script version 2: `tab_forward_end`/`tab_backward_end` and `dialogs {probes, candidates, probed}` replace `dialog_probes`; `capture` may import `tools.element` to check path parity.

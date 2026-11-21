@@ -1,0 +1,95 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 11-21-2026 15:09
+last_updated: 11-21-2026 15:09
+project: SystemC_V1
+project_key: NOKEY
+tracking_system: file-system
+story_location: CODEBASE/SystemC_V1/planning/stories
+development_status:
+  epic-1: in-progress
+  1-1-project-scaffold-and-dependency-rules: review
+  1-2-shared-contract-models-and-exported-schema: backlog
+  1-3-store-config-loader-and-config-hash: backlog
+  1-4-t1-t9-fixture-page: backlog
+  1-5-element_key-normaliser: backlog
+  1-6-capture-a-page: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-sdk-smoke-tests-for-isolation-and-the-hook: backlog
+  2-2-analysis-tools-over-a-capture: backlog
+  2-3-cost-ledger-and-cost-cap: backlog
+  2-4-provider-terms-gate: backlog
+  2-5-one-role-end-to-end-screen-reader: backlog
+  2-6-orchestrator-runs-all-six-roles-in-parallel: backlog
+  2-7-synthesis-agent: backlog
+  2-8-post-processing-to-a-report: backlog
+  2-9-run-storage-and-the-audit-command: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-axe-auditor-behind-the-auditor-port: backlog
+  3-2-system-a-command-determinism-and-shared-post-processing: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-page-generator-and-manifest: backlog
+  4-2-ground-truth-files-and-bind-step: backlog
+  4-3-e-commerce-seeded-pages: backlog
+  4-4-government-and-public-service-seeded-pages: backlog
+  4-5-forms-seeded-pages: backlog
+  4-6-content-and-news-seeded-pages: backlog
+  4-7-dev-test-split-and-manifest-checks: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-matching-rule: backlog
+  5-2-precision-recall-and-f1-breakdowns: backlog
+  5-3-ranking-quality-and-wcag-coverage: backlog
+  5-4-confidence-per-role-contribution-and-synthesis-only-issues: backlog
+  5-5-cost-time-and-behaviour-metrics: backlog
+  5-6-role-removal-ablation: backlog
+  5-7-offline-recompute-and-integrity-checks: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-prompt-freeze: backlog
+  6-2-dev-versus-final-model-enforcement: backlog
+  6-3-batch-runner-and-results-backup: backlog
+  6-4-a-vs-c-results-table: backlog
+  6-5-results-note-against-h1: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-show-a-report: backlog
+  7-2-record-decisions: backlog
+  epic-7-retrospective: optional

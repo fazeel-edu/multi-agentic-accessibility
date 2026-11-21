@@ -1,0 +1,5 @@
+#!/bin/sh
+# Blocks key-shaped strings in staged files. Enable: git config core.hooksPath .githooks
+files=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$files" ] && exit 0
+exec uv run python scripts/check_secrets.py $files

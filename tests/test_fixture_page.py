@@ -43,7 +43,8 @@ def ratio(fg, bg):
 
 def test_nine_defects_present_in_ground_truth():
     assert {i["defect"] for i in GT["items"]} == {f"T{n}" for n in range(1, 10)}
-    assert Counter(i["defect"] for i in GT["items"])["T2"] == 5  # five repeated links, five items
+    counts = Counter(i["defect"] for i in GT["items"])
+    assert counts["T2"] == 5 and counts["T8"] == 3  # five repeated links, five items
 
 
 def test_ground_truth_fields_valid_against_contract_enums_and_matrix():

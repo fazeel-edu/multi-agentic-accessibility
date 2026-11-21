@@ -15,4 +15,4 @@ Verified against PyPI on 2026-11-21 (re-verify at each pin change).
 | pytest (dev) | >=9.2 | 9.2.0 |
 | ruff (dev) | >=0.17 | 0.17.6 |
 
-Exact resolved versions are in `uv.lock`. axe-core 4.14.1 is vendored later (Story 1.6); npm version to be re-verified then.
+Exact resolved versions are in `uv.lock`. axe-core 4.14.1 is vendored in `vendor/axe-core/` (MPL-2.0, licence beside it), taken from the npm tarball `axe-core-4.14.1.tgz` on 2026-11-21 (npm `version` field 4.14.1). Chromium: Playwright 1.65.2 build `chromium-headless-shell` v1255 (Chrome 159).

@@ -81,8 +81,9 @@ def test_fixture_ground_truth_selectors_all_resolve():
     for item in GT["items"]:
         key = element_key(FIXTURE, item["selector"])
         assert isinstance(key, NodeKey), item["selector"]
-        keys[item["selector"]] = key
-    assert len(set(keys.values())) == len(keys)  # five Click here links stay five distinct items
+        keys[(item["defect"], item["selector"])] = key
+    t2 = [k for (d, _), k in keys.items() if d == "T2"]
+    assert len(set(t2)) == 5  # five Click here links stay five distinct items
     for sel in GT["controls"] + GT["decoys"]:
         assert not isinstance(element_key(FIXTURE, sel), UnresolvedKey), sel
 

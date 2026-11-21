@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harbor Audio - Wireless headphones</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; color: #222; background: #fff; margin: 0; line-height: 1.5; }
+  .skip { position: absolute; left: -999px; top: 0; background: #fff; padding: 8px; }
+  .skip:focus { left: 8px; z-index: 20; }
+  .site-top { position: sticky; top: 0; z-index: 10; background: #12355b; color: #fff; padding: 20px 24px; min-height: 40px; }
+  .site-top a { color: #fff; margin-right: 16px; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px; }
+  section { margin-bottom: 40px; }
+  .product-img { max-width: 100%; height: auto; display: block; }
+  .fine-print { color: #9b9b9b; font-size: 14px; }
+  label { display: block; font-weight: bold; margin-top: 12px; }
+  input { font-size: 16px; padding: 8px; border: 1px solid #555; width: 100%; max-width: 320px; box-sizing: border-box; }
+  input.field-alert { border: 2px solid #d00; }
+  button { font-size: 16px; padding: 8px 14px; }
+  .icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 6px; }
+  .rule { width: 100%; height: 8px; display: block; }
+  .spacer { height: 900px; }
+  #size-guide { position: fixed; top: 20%; left: 20%; right: 20%; background: #fff; border: 2px solid #12355b; padding: 24px; z-index: 30; }
+  #size-guide[hidden] { display: none; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="site-top">
+  <strong>Harbor Audio</strong>
+  <nav aria-label="Primary">
+    <a href="#overview">Overview</a>
+    <a href="#delivery">Delivery</a>
+    <a href="#checkout">Checkout</a>
+  </nav>
+</header>
+<main id="main">
+  <section id="overview">
+    <h1>Harbor H5 wireless headphones</h1>
+    <img id="hero" class="product-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="320" height="200" alt="image123.png">
+    <img id="fit-photo" class="product-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="320" height="200" alt="Headphones worn over the ears, shown from the side">
+    <img class="rule" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt="" width="640" height="8">
+    <p>Thirty hours of battery life, soft ear cushions and a folding frame.</p>
+    <p id="shipping-note" class="fine-print">Shipping estimates exclude public holidays.</p>
+    <p>
+      <button type="button" id="size-btn">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#12355b"></circle></svg>
+        Open size guide
+      </button>
+    </p>
+  </section>
+
+  <section id="reviews">
+    <h2>Info</h2>
+    <p>Customers describe the sound as warm and balanced.</p>
+    <p>Read more reviews <a id="more-1" href="#reviews-1">Click here</a>.</p>
+    <p>See the battery test <a id="more-2" href="#battery-test">Click here</a>.</p>
+    <p>Compare with the H3 <a id="more-3" href="#compare-h3">Click here</a>.</p>
+    <p>Download the manual <a id="more-4" href="#manual">Click here</a>.</p>
+    <p>Contact support <a id="more-5" href="#support">Click here</a>.</p>
+    <h2>More</h2>
+    <p>Each unit ships with a case and a charging cable.</p>
+    <h2>Stuff</h2>
+    <p>Spare ear cushions are sold separately.</p>
+    <p><a id="jump-terms" href="#terms-link">Jump to terms</a></p>
+  </section>
+
+  <section id="delivery">
+    <h2>Delivery options</h2>
+    <p>Standard delivery takes three to five working days.</p>
+  </section>
+
+  <div class="spacer"></div>
+
+  <section id="checkout">
+    <h2>Checkout details</h2>
+    <form action="#" onsubmit="return false">
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email">
+
+      <input id="fullname" name="fullname" type="text" placeholder="Full name" autocomplete="name">
+
+      <label for="promo">Promo code</label>
+      <input id="promo" name="promo" type="text" class="field-alert" value="SAVE5">
+
+      <label for="phone">Phone number</label>
+      <input id="phone" name="phone" type="tel" value="12-ab" aria-describedby="phone-msg">
+      <p id="phone-msg">Invalid</p>
+
+      <p><button type="submit" id="pay">Place order</button></p>
+    </form>
+    <p><a id="terms-link" href="#terms">Read the terms of sale</a></p>
+    <p id="terms">Orders can be returned within thirty days of delivery.</p>
+  </section>
+</main>
+<div id="size-guide" role="dialog" aria-modal="true" aria-labelledby="size-title" hidden>
+  <h2 id="size-title">Size guide</h2>
+  <p>Headband adjusts from 15 to 21 centimetres.</p>
+  <button type="button" id="size-close">Close</button>
+</div>
+<footer>
+  <p>&copy; Harbor Audio</p>
+</footer>
+<script>
+  document.getElementById('size-btn').addEventListener('click', function () {
+    document.getElementById('size-guide').hidden = false;
+  });
+  document.getElementById('size-close').addEventListener('click', function () {
+    document.getElementById('size-guide').hidden = true;
+  });
+</script>
+</body>
+</html>

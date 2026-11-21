@@ -1,0 +1,26 @@
+{
+  "schema_version": "1",
+  "status": "draft",
+  "page_id": "fixture-01",
+  "note": "Selectors are CSS; the bind-gt step (Story 4.2) turns them into element keys. Severity 1-4 (MINOR..CRITICAL). Draft until reviewed by Fazeel.",
+  "items": [
+    {"defect": "T1", "selector": "#hero", "acceptable_criteria": ["1.1.1"], "affected_user_group": "screen_reader", "expected_roles": ["screen_reader"], "issue_type": "M", "severity": 3, "scope": "element"},
+    {"defect": "T2", "selector": "#more-1", "acceptable_criteria": ["2.4.4"], "affected_user_group": "screen_reader", "expected_roles": ["screen_reader", "plain_language"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T2", "selector": "#more-2", "acceptable_criteria": ["2.4.4"], "affected_user_group": "screen_reader", "expected_roles": ["screen_reader", "plain_language"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T2", "selector": "#more-3", "acceptable_criteria": ["2.4.4"], "affected_user_group": "screen_reader", "expected_roles": ["screen_reader", "plain_language"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T2", "selector": "#more-4", "acceptable_criteria": ["2.4.4"], "affected_user_group": "screen_reader", "expected_roles": ["screen_reader", "plain_language"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T2", "selector": "#more-5", "acceptable_criteria": ["2.4.4"], "affected_user_group": "screen_reader", "expected_roles": ["screen_reader", "plain_language"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T3", "selector": "#shipping-note", "acceptable_criteria": ["1.4.3"], "affected_user_group": "colour_visual", "expected_roles": ["colour_visual"], "issue_type": "R", "severity": 3, "scope": "element"},
+    {"defect": "T4", "selector": "#fullname", "acceptable_criteria": ["3.3.2", "1.3.1", "4.1.2"], "affected_user_group": "cognitive", "expected_roles": ["cognitive", "plain_language", "screen_reader"], "issue_type": "J", "severity": 3, "scope": "element"},
+    {"defect": "T5", "selector": "#promo", "acceptable_criteria": ["1.4.1", "3.3.1"], "affected_user_group": "colour_visual", "expected_roles": ["colour_visual", "cognitive"], "issue_type": "J", "severity": 3, "scope": "element"},
+    {"defect": "T6", "selector": "#phone-msg", "acceptable_criteria": ["3.3.3", "3.3.1"], "affected_user_group": "cognitive", "expected_roles": ["cognitive", "plain_language"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T7", "selector": "#size-guide", "acceptable_criteria": ["2.4.3"], "affected_user_group": "keyboard", "expected_roles": ["keyboard"], "issue_type": "J", "severity": 3, "scope": "element"},
+    {"defect": "T8", "selector": "#jump-terms", "acceptable_criteria": ["2.4.11"], "affected_user_group": "keyboard", "expected_roles": ["keyboard", "colour_visual"], "issue_type": "M", "severity": 3, "scope": "element"},
+    {"defect": "T9", "selector": "#reviews > h2:nth-of-type(1)", "acceptable_criteria": ["2.4.6"], "affected_user_group": "plain_language", "expected_roles": ["plain_language", "screen_reader", "cognitive"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T9", "selector": "#reviews > h2:nth-of-type(2)", "acceptable_criteria": ["2.4.6"], "affected_user_group": "plain_language", "expected_roles": ["plain_language", "screen_reader", "cognitive"], "issue_type": "J", "severity": 2, "scope": "element"},
+    {"defect": "T9", "selector": "#reviews > h2:nth-of-type(3)", "acceptable_criteria": ["2.4.6"], "affected_user_group": "plain_language", "expected_roles": ["plain_language", "screen_reader", "cognitive"], "issue_type": "J", "severity": 2, "scope": "element"}
+  ],
+  "no_issue_criteria": ["2.1.1", "2.4.1", "2.4.7", "3.1.1"],
+  "controls": ["#fit-photo", "#email", "#delivery > h2", "#terms-link", "#pay"],
+  "decoys": ["#size-btn svg", "img.rule"]
+}

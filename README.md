@@ -25,7 +25,7 @@ uv run systemc capture data/pages/fixture-01.html   # writes data/captures/{page
 ## System C audit (Epic 2)
 
 ```
-export ANTHROPIC_API_KEY=...        # environment only, never a file
+cp .env.systemc.example .env.systemc   # put your key in it (git-ignored; not exported to your shell or Claude Code)
 # fill in config/provider_terms.md (Read on: YYYY-MM-DD plus three topics)
 uv run systemc capture data/pages/fixture-01.html
 uv run systemc audit fixture-01      # prints a cost estimate, runs 6 roles + synthesis, stores the Run

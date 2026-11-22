@@ -16,11 +16,21 @@ from contract.errors import MissingApiKeyError, ProviderError
 from contract.models import ToolCall
 
 
-def require_api_key() -> None:
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+def api_key() -> str:
+    """The key for the session subprocess: process environment first, then the project's
+    git-ignored `.env.systemc`. It is passed only to the subprocess, never put in os.environ."""
+    from store.secrets import SECRETS_FILE, read_api_key
+
+    key = os.environ.get("ANTHROPIC_API_KEY") or read_api_key()
+    if not key:
         raise MissingApiKeyError(
-            "ANTHROPIC_API_KEY is not set in the environment; export it, never put it in a file"
+            f"ANTHROPIC_API_KEY not found: put it in {SECRETS_FILE.name} (see .env.systemc.example); never commit it"
         )
+    return key
+
+
+def require_api_key() -> None:
+    api_key()
 
 
 def versions() -> dict[str, str]:
@@ -35,6 +45,9 @@ def versions() -> dict[str, str]:
 
 
 class SdkSessionRunner:
+    def __init__(self, key: str | None = None) -> None:
+        self._key = key
+
     """One isolated SDK session per call: no settings sources, no built-ins, empty temp cwd."""
 
     async def run(self, request: SessionRequest) -> SessionResult:
@@ -48,12 +61,14 @@ class SdkSessionRunner:
             query,
         )
 
+        key = self._key or api_key()
         calls: list[ToolCall] = []
         server = build_role_server(request.role, request.capture)
         allowed = allowed_tool_names(request.role)
         hook = make_allowlist_hook(request.role, allowed, calls)
         with tempfile.TemporaryDirectory(prefix="systemc-") as cwd:
             options = ClaudeAgentOptions(
+                env={"ANTHROPIC_API_KEY": key},
                 system_prompt=request.system_prompt,
                 tools=[],
                 allowed_tools=allowed,

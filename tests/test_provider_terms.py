@@ -1,3 +1,4 @@
+import re
 import shutil
 from datetime import date
 from pathlib import Path
@@ -27,9 +28,15 @@ def write(tmp_path, text):
 TODAY = date(2026, 11, 21)
 
 
-def test_template_in_the_repo_is_refused_until_filled_in():
+def test_untouched_template_is_refused(tmp_path):
+    shutil.copy(REAL / "provider_terms.md", tmp_path)
+    text = (tmp_path / "provider_terms.md").read_text()
+    # an untouched template has every value as TODO, whatever the repo copy holds today
+    template = re.sub(r"(Read on:).*", r"\1 TODO (YYYY-MM-DD)", text)
+    template = re.sub(r"(- [A-Za-z ]+:).*", r"\1 TODO", template)
+    (tmp_path / "provider_terms.md").write_text(template)
     with pytest.raises(ProviderTermsError, match="Read on"):
-        terms.require_provider_terms(REAL)
+        terms.require_provider_terms(tmp_path)
 
 
 def test_dated_complete_record_passes_and_returns_the_date(tmp_path):
@@ -69,11 +76,13 @@ def test_missing_file_blocks(tmp_path):
         terms.require_provider_terms(tmp_path)
 
 
-def test_filled_copy_of_the_template_starts(tmp_path):
-    shutil.copy(REAL / "provider_terms.md", tmp_path)
-    text = (tmp_path / "provider_terms.md").read_text()
-    text = text.replace("Read on: TODO (YYYY-MM-DD)", "Read on: 2026-11-20").replace(
-        "TODO", "recorded"
-    )
-    (tmp_path / "provider_terms.md").write_text(text)
-    assert terms.require_provider_terms(tmp_path, TODAY) == "2026-11-20"
+@pytest.mark.parametrize("value", ["TBD", "N/A", "n/a.", "TODO later"])
+def test_more_placeholders_are_refused(tmp_path, value):
+    text = FILLED.replace("- Training use: noted from the page", f"- Training use: {value}")
+    with pytest.raises(ProviderTermsError, match="Training use"):
+        terms.require_provider_terms(write(tmp_path, text), TODAY)
+
+
+def test_star_bullets_and_indent_are_accepted(tmp_path):
+    text = FILLED.replace("- ", "  * ")
+    assert terms.require_provider_terms(write(tmp_path, text), TODAY) == "2026-11-20"

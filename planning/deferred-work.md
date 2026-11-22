@@ -11,3 +11,9 @@
 - axe `rule_id` to criterion mapping needs a `rule_ids` field on matrix entries (schema change and re-hash): Story 2.8.
 - `fixture-01.draft.json` has an ad hoc shape and T8 items derived from the pinned capture; Story 4.2 replaces it with bound ground truth.
 - A corrupt existing Capture (tampered artifacts) is returned as is by `write_capture`; `read_capture` detects it. Add a repair path if it ever happens.
+
+## Deferred from: code review of Epic 2 (2026-11-22)
+- A crashed session leaves a `reserve` with no `settle`, permanently shrinking the phase cap. Needs a reconcile or abandoned-event tool. Severity unverified (medium); settle by killing a run mid-session and reading `results/ledger-*.jsonl`.
+- The one-session-budget margin does not cover six parallel sessions all overshooting (AD-8 margin as specified). Unverified (medium); settle with a live run and compare ledger spend to `max_budget_usd`.
+- Large pages can overflow the prompt (html, a11y tree, styles are pasted whole). Add a truncation policy with real pages (Epic 6).
+- `store.runs.read_run` puts all System A issues in `needs_review`; revisit with the axe auditor (Epic 3).

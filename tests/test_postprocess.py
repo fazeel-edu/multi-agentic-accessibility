@@ -34,9 +34,9 @@ def report(*issues, system=System.ROLE_MULTI_AGENT, **kw):
 
 def test_same_element_via_css_and_xpath_merges_and_counts_distinct_roles():
     r = report(
-        issue("screen_reader", "#hero"),
-        issue("keyboard", '//img[@id="hero"]'),
-        issue("screen_reader", "main section img:first-of-type"),
+        issue("screen_reader", "#hero", "2.4.1"),
+        issue("keyboard", '//img[@id="hero"]', "2.4.1"),
+        issue("screen_reader", "main section img:first-of-type", "2.4.1"),
     )
     assert len(r.issues) == 1
     merged = r.issues[0]
@@ -69,17 +69,10 @@ def test_synthesis_only_issue_has_one_voice():
     assert r.issues[0].roles == [Role.INCLUSIVE_DESIGN] and r.issues[0].confidence == 1
 
 
-def test_confidence_is_set_by_code_up_to_six():
-    roles = [
-        "screen_reader",
-        "keyboard",
-        "colour_visual",
-        "cognitive",
-        "plain_language",
-        "wcag_structure",
-    ]
-    r = report(*[issue(role) for role in roles])
-    assert r.issues[0].confidence == 6
+def test_confidence_is_set_by_code_from_distinct_roles():
+    roles = ["screen_reader", "plain_language", "cognitive"]  # the roles that own 2.4.6
+    r = report(*[issue(role, criterion="2.4.6") for role in roles])
+    assert r.issues[0].confidence == 3
 
 
 def test_axe_rule_ids_expand_through_the_matrix():
@@ -132,9 +125,7 @@ def test_grounded_only_for_resolved_elements():
 
 
 def test_severity_comes_from_the_matrix_not_the_reporter():
-    r = report(
-        issue(criterion="2.1.2", element="#size-guide"), issue(criterion="2.4.6", element="#hero")
-    )
+    r = report(issue("keyboard", "#size-guide", "2.1.2"), issue("screen_reader", "#hero", "2.4.6"))
     by = {i.criterion: i.severity for i in r.issues}
     assert by == {"2.1.2": Severity.CRITICAL, "2.4.6": Severity.MODERATE}
 
@@ -154,7 +145,7 @@ def test_report_carries_run_fields_statement_notes_and_role_status():
 def test_postprocess_is_pure_and_input_order_does_not_change_the_report():
     issues = [
         issue("screen_reader", "#hero"),
-        issue("keyboard", "#hero"),
+        issue("keyboard", "#hero", "2.4.1"),
         issue("cognitive", "#fullname", criterion="3.3.2"),
         issue("axe_core", "#shipping-note", None, "color-contrast"),
         issue("plain_language", "#more-1", criterion="2.4.4"),
@@ -213,3 +204,37 @@ def test_matrix_has_severity_and_rules_for_every_entry():
     assert MATRIX.criteria_for_rule("color-contrast") == ["1.4.3"]
     assert MATRIX.criteria_for_rule("link-name") == ["2.4.4", "4.1.2"]
     assert MATRIX.criteria_for_rule("nope") == []
+
+
+def test_out_of_subset_criterion_goes_to_unmapped_not_ranked():
+    r = report(issue("keyboard", "#hero", "1.1.1"), issue("screen_reader", "#hero", "1.1.1"))
+    assert [i.roles for i in r.issues] == [[Role.SCREEN_READER]]
+    assert [(u.role, u.criterion) for u in r.unmapped_issues] == [(Role.KEYBOARD, "1.1.1")]
+
+
+def test_out_of_scope_criterion_falls_through_to_the_rule_id():
+    r = report(issue("axe_core", "#hero", "9.9.9", "image-alt"))
+    assert [i.criterion for i in r.issues] == ["1.1.1"]
+
+
+def test_synthesis_and_axe_may_use_any_matrix_criterion():
+    r = report(
+        issue("inclusive_design", "#hero", "2.1.1", derived_from=["keyboard"]),
+        issue("axe_core", "#hero", "3.3.2"),
+    )
+    assert {i.criterion for i in r.issues} == {"2.1.1", "3.3.2"}
+
+
+def test_a_reporting_role_supplies_the_merged_text_not_the_synthesis_echo():
+    r = report(
+        issue(
+            "inclusive_design",
+            "#hero",
+            "1.1.1",
+            description="aaa pattern",
+            derived_from=["screen_reader"],
+        ),
+        issue("screen_reader", "#hero", "1.1.1", description="the real description"),
+    )
+    assert r.issues[0].description == "the real description"
+    assert r.issues[0].evidence[0] == "screen_reader saw it"

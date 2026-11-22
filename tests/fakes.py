@@ -60,5 +60,5 @@ class FakeRunner:
         return [r.role for r in self.requests]
 
 
-def provider_error(retryable=True, kind="rate_limit"):
-    return ProviderError(kind, "boom", retryable)
+def provider_error(retryable=True, kind="rate_limit", cost=None, calls=None):
+    return ProviderError(kind, "boom", retryable, cost_usd=cost, tool_calls=calls)

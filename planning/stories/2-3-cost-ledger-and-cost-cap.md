@@ -2,7 +2,7 @@
 title: 'Story 2.3: Cost ledger and Cost Cap'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 

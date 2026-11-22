@@ -124,9 +124,14 @@ def test_audit_stores_a_run_and_a_readable_report(env, monkeypatch, capsys, fixt
 
 
 def test_audit_refuses_without_dated_provider_terms(tmp_path, monkeypatch, capsys):
-    from store import paths
+    from contract.errors import ProviderTermsError
+    from store import paths, terms
+
+    def refuse():
+        raise ProviderTermsError("provider_terms.md: set 'Read on: YYYY-MM-DD'")
 
     monkeypatch.setattr(paths, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(terms, "require_provider_terms", refuse)
     runner = fake(monkeypatch)
     assert cli.main(["audit", "fixture-01"]) == 1
     assert "Read on" in capsys.readouterr().err and runner.requests == []

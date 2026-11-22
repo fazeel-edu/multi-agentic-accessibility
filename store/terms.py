@@ -18,8 +18,12 @@ class ProviderTerms:
     topics: dict[str, str]
 
 
+_PLACEHOLDERS = ("TODO", "TBD", "N/A", "NA", "?", "FILL")
+
+
 def _is_placeholder(text: str) -> bool:
-    return not text.strip() or text.strip().upper().startswith("TODO")
+    t = text.strip().upper().rstrip(".")
+    return not t or t.startswith("TODO") or t in _PLACEHOLDERS
 
 
 def load_provider_terms(config_dir: Path = CONFIG_DIR, today: date | None = None) -> ProviderTerms:
@@ -45,7 +49,7 @@ def load_provider_terms(config_dir: Path = CONFIG_DIR, today: date | None = None
     topics: dict[str, str] = {}
     missing = []
     for topic in REQUIRED_TOPICS:
-        found = re.search(rf"^-\s*{re.escape(topic)}:[ \t]*(.*)$", text, re.MULTILINE)
+        found = re.search(rf"^\s*[-*]\s*{re.escape(topic)}:[ \t]*(.*)$", text, re.MULTILINE)
         if not found or _is_placeholder(found.group(1)):
             missing.append(topic)
         else:

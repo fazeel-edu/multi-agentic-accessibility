@@ -131,10 +131,14 @@ def element_text(capture_html: str, selector: str) -> str | None:
 
 
 def visible_text(capture_html: str) -> str:
-    """Readable text of the page: scripts, styles and hidden elements removed, whitespace collapsed."""
+    """Readable text of the page: head, scripts, styles and hidden elements removed (their
+    following text is kept), whitespace collapsed."""
     root = _parse(capture_html)
     if root is None:
         return ""
-    for bad in root.xpath("//script|//style|//template|//*[@hidden]"):
-        bad.getparent().remove(bad) if bad.getparent() is not None else None
+    for bad in root.xpath(
+        "//head|//script|//style|//template|//noscript|//*[@hidden]|//*[@aria-hidden='true']"
+    ):
+        if bad.getparent() is not None:
+            bad.drop_tree()  # lxml.html: removes the node, keeps its tail text
     return "\n".join(line for line in (" ".join(t.split()) for t in root.itertext()) if line)

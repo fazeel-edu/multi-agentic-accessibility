@@ -63,7 +63,7 @@ def test_cap_blocks_new_sessions_but_not_settling_in_flight(ledger):
     held = [ledger.reserve("run-1", f"s{i}") for i in range(9)]  # 9 held + 1 margin = cap 10
     with pytest.raises(CostCapReached):
         ledger.reserve("run-1", "s9")
-    assert ledger.is_stopped("run-1")
+    assert ledger.is_stopped()
     for r in held:  # in-flight sessions finish and settle
         ledger.settle(r, 0.9)
     assert ledger.spent() == pytest.approx(8.1)
@@ -90,7 +90,9 @@ def test_stopped_run_does_not_resume_silently(ledger):
         ledger.reserve("run-1", "x")
     with pytest.raises(RunStopped):
         ledger.reserve("run-1", "y")
-    assert not ledger.is_stopped("run-2")  # another Run is not stopped by name
+    assert ledger.is_stopped()  # the stop covers the whole phase ledger, not one run id
+    with pytest.raises(RunStopped):
+        ledger.reserve("run-2", "y")
     with pytest.raises(CostCapReached):  # explicit flag lifts the stop, but the cap still applies
         ledger.reserve("run-1", "z", allow_resume=True)
     assert [e["event"] for e in lines(ledger)].count("resume") == 1
@@ -106,7 +108,7 @@ def test_resume_flag_allows_work_once_budget_frees_up(tmp_path):
     with pytest.raises(RunStopped):
         ledger.reserve("r", "c")
     assert ledger.reserve("r", "c", allow_resume=True).session == "c"
-    assert not ledger.is_stopped("r")
+    assert not ledger.is_stopped()
 
 
 def test_parallel_reservations_never_exceed_the_cap(tmp_path):
@@ -146,6 +148,7 @@ def test_invalid_construction_and_amounts(tmp_path, ledger):
 def test_estimate_before_an_llm_stage():
     est = estimate_cost(pages=10, runs_per_page=3, session_budget_usd=1.0, cap_usd=50.0)
     assert est.sessions == 210 and est.upper_bound_usd == 210.0 and not est.within_cap
+    assert est.worst_case_usd == 210.0
     text = est.describe()
     assert "210 sessions" in text and "ABOVE" in text and "SDK estimate" in text
     small = estimate_cost(1, 1, 1.0, 50.0)
@@ -160,3 +163,15 @@ def test_ledger_is_built_from_config_and_phase(tmp_path, monkeypatch):
     cfg = load().config.settings
     led = Ledger.for_phase("dev", cfg.cost_cap_usd, cfg.max_budget_usd)
     assert led.path == tmp_path / "ledger-dev.jsonl" and led.cap_usd == cfg.cost_cap_usd
+
+
+def test_estimate_shows_worst_case_and_uses_what_is_left():
+    est = estimate_cost(1, 1, 1.0, 50.0, max_attempts=6, remaining_usd=8.0)
+    assert (est.upper_bound_usd, est.worst_case_usd, est.available_usd) == (7.0, 42.0, 8.0)
+    assert est.within_cap  # 7 plus one session of margin is exactly 8
+    assert "worst case with retries USD 42.00" in est.describe()
+
+
+def test_estimate_checks_the_margin():
+    assert estimate_cost(1, 1, 1.0, 50.0, remaining_usd=8.0).within_cap
+    assert not estimate_cost(1, 1, 1.0, 50.0, remaining_usd=7.5).within_cap

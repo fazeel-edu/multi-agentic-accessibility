@@ -46,14 +46,14 @@ development_status:
 
   epic-2: in-progress
   2-1-sdk-smoke-tests-for-isolation-and-the-hook: in-progress
-  2-2-analysis-tools-over-a-capture: review
-  2-3-cost-ledger-and-cost-cap: review
-  2-4-provider-terms-gate: review
-  2-5-one-role-end-to-end-screen-reader: review
-  2-6-orchestrator-runs-all-six-roles-in-parallel: review
-  2-7-synthesis-agent: review
-  2-8-post-processing-to-a-report: review
-  2-9-run-storage-and-the-audit-command: review
+  2-2-analysis-tools-over-a-capture: done
+  2-3-cost-ledger-and-cost-cap: done
+  2-4-provider-terms-gate: done
+  2-5-one-role-end-to-end-screen-reader: done
+  2-6-orchestrator-runs-all-six-roles-in-parallel: done
+  2-7-synthesis-agent: done
+  2-8-post-processing-to-a-report: done
+  2-9-run-storage-and-the-audit-command: done
   epic-2-retrospective: optional
 
   epic-3: backlog

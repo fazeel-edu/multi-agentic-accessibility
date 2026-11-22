@@ -2,7 +2,7 @@
 title: 'Story 2.8: Post-processing to a Report'
 type: 'feature'
 created: '2026-11-21'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 ---
 

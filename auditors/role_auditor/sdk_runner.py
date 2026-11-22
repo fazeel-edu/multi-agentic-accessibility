@@ -44,11 +44,14 @@ def versions() -> dict[str, str]:
     }
 
 
+RETRYABLE_SUBTYPES = frozenset({"error_during_execution"})  # deterministic results are not retried
+
+
 class SdkSessionRunner:
+    """One isolated SDK session per call: no settings sources, no built-ins, empty temp cwd."""
+
     def __init__(self, key: str | None = None) -> None:
         self._key = key
-
-    """One isolated SDK session per call: no settings sources, no built-ins, empty temp cwd."""
 
     async def run(self, request: SessionRequest) -> SessionResult:
         from claude_agent_sdk import (
@@ -92,14 +95,18 @@ class SdkSessionRunner:
                     elif isinstance(message, ResultMessage):
                         final = message
             except ClaudeSDKError as exc:
-                raise ProviderError("sdk_error", str(exc)[:300], True) from exc
+                raise ProviderError("sdk_error", str(exc)[:300], True, tool_calls=calls) from exc
         if final is None:
-            raise ProviderError("no_result", "the session ended without a result message", True)
+            raise ProviderError(
+                "no_result", "the session ended without a result message", True, tool_calls=calls
+            )
         if final.is_error:
             raise ProviderError(
                 final.subtype,
                 "; ".join(final.errors or [final.subtype])[:300],
-                final.subtype != "error_max_budget_usd",
+                final.subtype in RETRYABLE_SUBTYPES,
+                cost_usd=float(final.total_cost_usd or 0.0) or None,
+                tool_calls=calls,
             )
         usage = final.usage or {}
         return SessionResult(

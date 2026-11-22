@@ -52,7 +52,10 @@ def _contrast_check(c: Capture, a: dict[str, Any]) -> str:
 
 
 def _contrast_failures(c: Capture, a: dict[str, Any]) -> str:
-    return _json(contrast.failing_rows(c, a.get("selector")))
+    try:
+        return _json(contrast.failing_rows(c, a.get("selector")))
+    except ValueError as exc:
+        return _json({"error": str(exc)})
 
 
 def _readability(c: Capture, a: dict[str, Any]) -> str:

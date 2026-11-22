@@ -31,3 +31,5 @@ uv run systemc capture data/pages/fixture-01.html
 uv run systemc audit fixture-01      # prints a cost estimate, runs 6 roles + synthesis, stores the Run
 uv run pytest tests/test_sdk_live.py -s   # Story 2.1 live checks (paid, small)
 ```
+
+After a Cost Cap stop the next `systemc audit` in that phase refuses until you raise `cost_cap_usd` in `config/settings.toml` and pass `--resume`.

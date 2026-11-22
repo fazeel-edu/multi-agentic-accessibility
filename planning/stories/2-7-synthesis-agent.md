@@ -2,7 +2,7 @@
 title: 'Story 2.7: Synthesis Agent'
 type: 'feature'
 created: '2026-11-21'
-status: 'review'
+status: 'done'
 route: 'dispatch'
 ---
 

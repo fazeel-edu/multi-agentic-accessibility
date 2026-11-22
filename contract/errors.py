@@ -28,10 +28,19 @@ class ProviderTermsError(ContractError):
 class ProviderError(ContractError):
     """A model-provider or SDK failure. `retryable` errors (timeout, 429, 5xx) get bounded retries."""
 
-    def __init__(self, kind: str, message: str, retryable: bool) -> None:
+    def __init__(
+        self,
+        kind: str,
+        message: str,
+        retryable: bool,
+        cost_usd: float | None = None,
+        tool_calls: list | None = None,
+    ) -> None:
         super().__init__(message)
         self.kind = kind
         self.retryable = retryable
+        self.cost_usd = cost_usd  # cumulative SDK cost when the failed session reported one
+        self.tool_calls = tool_calls or []  # calls the hook logged before the failure
 
 
 class MissingApiKeyError(ContractError):

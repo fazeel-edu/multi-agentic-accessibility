@@ -15,10 +15,15 @@ def read_api_key(path: Path = SECRETS_FILE) -> str | None:
     except (OSError, UnicodeDecodeError):
         return None
     for line in text.splitlines():
-        line = line.strip()
+        line = line.strip().removeprefix("export ").lstrip()
         if line.startswith("#") or "=" not in line:
             continue
         name, _, value = line.partition("=")
         if name.strip() == KEY_NAME:
-            return value.strip().strip("\"'") or None
+            value = value.strip()
+            if value and value[0] in "\"'":
+                value = value[1:].split(value[0])[0]
+            else:
+                value = value.split(" #")[0].strip()
+            return value or None
     return None

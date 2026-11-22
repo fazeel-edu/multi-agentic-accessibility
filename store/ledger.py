@@ -31,19 +31,22 @@ class Reservation:
 
 @dataclass(frozen=True)
 class CostEstimate:
-    sessions: int
-    upper_bound_usd: float
-    cap_usd: float
+    sessions: int  # sessions if nothing is retried
+    upper_bound_usd: float  # each of those sessions spends its whole budget
+    worst_case_usd: float  # every session retried to the limit
+    available_usd: float  # cap, or what is left of it
+    margin_usd: float  # one session budget the cap check keeps free
 
     @property
     def within_cap(self) -> bool:
-        return self.upper_bound_usd <= self.cap_usd
+        return self.upper_bound_usd + self.margin_usd <= self.available_usd
 
     def describe(self) -> str:
         verdict = "within" if self.within_cap else "ABOVE"
         return (
-            f"{self.sessions} sessions, at most USD {self.upper_bound_usd:.2f} "
-            f"(per-session budgets summed; SDK estimate), {verdict} the Cost Cap of USD {self.cap_usd:.2f}"
+            f"{self.sessions} sessions without retries, up to USD {self.upper_bound_usd:.2f} "
+            f"(SDK estimate: per-session budgets summed); worst case with retries USD {self.worst_case_usd:.2f}. "
+            f"{verdict} the USD {self.available_usd:.2f} available under the Cost Cap"
         )
 
 
@@ -53,10 +56,20 @@ def estimate_cost(
     session_budget_usd: float,
     cap_usd: float,
     sessions_per_run: int = SESSIONS_PER_RUN,
+    max_attempts: int = 1,
+    remaining_usd: float | None = None,
 ) -> CostEstimate:
-    """Upper bound printed before any LLM stage: every session spends its whole budget."""
+    """Spend printed before any LLM stage. `max_attempts` is how many sessions one role can
+    start at most (output-gate retry times provider retries); `remaining_usd` is the ledger's
+    free budget when a ledger exists."""
     sessions = pages * runs_per_page * sessions_per_run
-    return CostEstimate(sessions, round(sessions * session_budget_usd, 2), cap_usd)
+    return CostEstimate(
+        sessions=sessions,
+        upper_bound_usd=round(sessions * session_budget_usd, 2),
+        worst_case_usd=round(sessions * max_attempts * session_budget_usd, 2),
+        available_usd=cap_usd if remaining_usd is None else remaining_usd,
+        margin_usd=session_budget_usd,
+    )
 
 
 def last_result_cost(results: Iterable[dict[str, Any]]) -> tuple[float, dict[str, Any]]:
@@ -133,10 +146,11 @@ class Ledger:
         return settled, sum(reserved.values())
 
     @staticmethod
-    def _stopped(events: list[dict[str, Any]], run_id: str) -> bool:
+    def _stopped(events: list[dict[str, Any]]) -> bool:
+        """A stop applies to the whole phase ledger and lasts until an explicit resume."""
         state = False
         for e in events:
-            if e.get("run_id") == run_id and e["event"] in ("stop", "resume"):
+            if e["event"] in ("stop", "resume"):
                 state = e["event"] == "stop"
         return state
 
@@ -150,9 +164,9 @@ class Ledger:
             settled, outstanding = self._totals(self._events())
         return self.cap_usd - settled - outstanding
 
-    def is_stopped(self, run_id: str) -> bool:
+    def is_stopped(self) -> bool:
         with self._locked():
-            return self._stopped(self._events(), run_id)
+            return self._stopped(self._events())
 
     def reserve(
         self,
@@ -172,10 +186,10 @@ class Ledger:
             raise LedgerError("reservation must be positive")
         with self._locked():
             events = self._events()
-            if self._stopped(events, run_id):
+            if self._stopped(events):
                 if not allow_resume:
                     raise RunStopped(
-                        f"run {run_id} stopped at the Cost Cap; resume needs an explicit flag"
+                        f"{self.path.name} stopped at the Cost Cap; raise the cap and pass --resume to continue"
                     )
                 self._append({"event": "resume", "run_id": run_id})
             settled, outstanding = self._totals(events)

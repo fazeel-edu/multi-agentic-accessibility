@@ -53,11 +53,13 @@ def _section(name: str, capture: Capture) -> str:
     raise ValueError(f"unknown input {name!r}")
 
 
+def _inputs(spec: RoleSpecFile, capture: Capture) -> str:
+    return "\n\n".join(f"## {name}\n{_section(name, capture)}" for name in spec.inputs)
+
+
 def user_prompt(spec: RoleSpecFile, capture: Capture) -> str:
     """Only the inputs the Role Spec names, in its order."""
-    return "\n\n".join(f"## {name}\n{_section(name, capture)}" for name in spec.inputs) + (
-        "\n\nAudit this page now and answer with the JSON object only."
-    )
+    return _inputs(spec, capture) + "\n\nAudit this page now and answer with the JSON object only."
 
 
 def synthesis_user_prompt(
@@ -69,9 +71,7 @@ def synthesis_user_prompt(
         for role, issues in outputs.items()
     }
     return (
-        user_prompt(spec, capture).removesuffix(
-            "\n\nAudit this page now and answer with the JSON object only."
-        )
+        _inputs(spec, capture)
         + "\n\n## role_outputs\n"
         + json.dumps(body, indent=2)
         + ("\n\n## failed_roles\n" + ", ".join(r.value for r in failed) if failed else "")

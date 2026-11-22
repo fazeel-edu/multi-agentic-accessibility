@@ -5,10 +5,17 @@ from typing import Any
 from contract.capture import Capture
 
 
+def _selector(target: object) -> str | None:
+    """First selector of an axe target; nested (iframe, shadow) targets are flattened."""
+    while isinstance(target, list) and target:
+        target = target[0]
+    return target if isinstance(target, str) else None
+
+
 def _nodes(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
-            "selector": n["target"][0] if n["target"] else None,
+            "selector": _selector(n.get("target")),
             "html": n.get("html", "")[:200],
             "failure": (n.get("failureSummary") or "")[:300],
         }

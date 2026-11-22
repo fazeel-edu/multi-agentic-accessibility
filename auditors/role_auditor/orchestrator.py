@@ -24,6 +24,9 @@ ROLES: tuple[Role, ...] = (
 def run_state(statuses: list[RoleStatus]) -> RunState:
     if any(s.failure and s.failure.kind == "cost_cap" for s in statuses):
         return RunState.STOPPED_COST_CAP
+    judged = [s for s in statuses if s.state is not RoleState.EXCLUDED]
+    if judged and all(s.state is RoleState.FAILED for s in judged):
+        return RunState.FAILED  # nothing usable came out of this Run
     return RunState.COMPLETE
 
 
@@ -44,8 +47,6 @@ async def audit(
         *(run_agent(specs[r], prompts.user_prompt(specs[r], capture), capture, ctx) for r in active)
     )  # no role receives another role's output
     by_role: dict[Role, RoleOutcome] = dict(zip(active, outcomes, strict=True))
-    if list(by_role) != active:
-        raise OrchestrationError("a role was skipped, added or repeated")
 
     ok = {r: o.issues for r, o in by_role.items() if o.status.state is RoleState.OK}
     failed = [r for r, o in by_role.items() if o.status.state is RoleState.FAILED]
@@ -59,7 +60,10 @@ async def audit(
             role=Role.INCLUSIVE_DESIGN,
             state=RoleState.FAILED,
             failure=FailureRecord(
-                stage="synthesis", kind="no_input", message="all six roles failed", retryable=False
+                stage="synthesis",
+                kind="no_input",
+                message="no role produced output",
+                retryable=False,
             ),
         )
         synth = RoleOutcome(status=status)

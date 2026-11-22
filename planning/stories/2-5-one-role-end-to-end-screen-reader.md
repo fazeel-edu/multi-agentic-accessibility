@@ -2,7 +2,7 @@
 title: 'Story 2.5: One role end to end'
 type: 'feature'
 created: '2026-11-21'
-status: 'review'
+status: 'done'
 route: 'dispatch'
 ---
 

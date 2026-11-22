@@ -34,14 +34,14 @@ def _audit(args: argparse.Namespace) -> int:
     from datetime import UTC, datetime
 
     from auditors.role_auditor.orchestrator import audit, run_state
-    from auditors.role_auditor.role_runner import AgentContext
+    from auditors.role_auditor.role_runner import PROVIDER_RETRIES, AgentContext
     from auditors.role_auditor.sdk_runner import versions
-    from contract.enums import Phase, Role, System
+    from contract.enums import Phase, Role, RoleState, RunState, System
     from contract.models import Run
     from postprocess import run as postprocess
     from store import captures, runs
     from store.config import load
-    from store.ledger import Ledger, estimate_cost
+    from store.ledger import SESSIONS_PER_RUN, Ledger, estimate_cost
     from store.roles import load_role_specs
     from store.terms import require_provider_terms
 
@@ -58,16 +58,29 @@ def _audit(args: argparse.Namespace) -> int:
     capture_hash = args.capture_hash or hashes[0]
     capture = captures.read_capture(args.page_id, capture_hash)
     settings = loaded.config.settings
-    estimate = estimate_cost(1, 1, settings.max_budget_usd, settings.cost_cap_usd, 7 - len(exclude))
+    ledger = Ledger.for_phase(phase.value, settings.cost_cap_usd, settings.max_budget_usd)
+    if ledger.is_stopped() and not args.resume:
+        raise ContractError(
+            f"{ledger.path.name} stopped at the Cost Cap; raise cost_cap_usd in config/settings.toml "
+            "and pass --resume to continue"
+        )
+    estimate = estimate_cost(
+        1,
+        1,
+        settings.max_budget_usd,
+        settings.cost_cap_usd,
+        SESSIONS_PER_RUN - len(exclude),
+        max_attempts=(PROVIDER_RETRIES + 1) * 2,
+        remaining_usd=ledger.remaining(),
+    )
     sys.stdout.write(estimate.describe() + "\n")
     if not estimate.within_cap:
         raise ContractError(
-            "estimated cost is above the Cost Cap; raise the cap in config/settings.toml"
+            "estimated cost does not fit under the Cost Cap; raise it in config/settings.toml"
         )
     runner = make_runner()
     run_id = f"{datetime.now(UTC):%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:6]}"
     started_at = datetime.now(UTC).isoformat(timespec="seconds")
-    ledger = Ledger.for_phase(phase.value, settings.cost_cap_usd, settings.max_budget_usd)
     model = loaded.config.model_for(phase)
     ctx = AgentContext(
         runner=runner,
@@ -90,7 +103,7 @@ def _audit(args: argparse.Namespace) -> int:
         model_id=model.model_id,
         config_hash=loaded.config_hash,
         capture_hash=capture_hash,
-        versions=versions(),
+        versions={**capture.manifest.versions, **versions()},
         variant=sorted(exclude),
         provider_terms_date=terms_date,
         role_status=result.role_status,
@@ -99,21 +112,22 @@ def _audit(args: argparse.Namespace) -> int:
         seconds=result.seconds,
         started_at=started_at,
     )
-    directory = runs.write_run(run, result)
+    runs.write_run(run, result)
     report = postprocess(result, capture, loaded.config.matrix, run)
     path = runs.write_report(report)
-    failed = [s.role.value for s in result.role_status if s.state.value == "failed"]
+    failed = [s.role.value for s in result.role_status if s.state is RoleState.FAILED]
     sys.stdout.write(
         f"{run_id} {run.state.value}: {len(report.issues)} issues, {len(report.unmapped_issues)} unmapped, "
         f"cost USD {result.usage.cost_usd:.2f} (SDK estimate)\n{path}\n"
     )
     if failed:
         sys.stderr.write(f"warning: failed roles: {', '.join(failed)}\n")
-    _ = directory
-    return 0
+    return 1 if run.state is RunState.FAILED else 0
 
 
 def main(argv: list[str] | None = None) -> int:
+    from auditors.role_auditor.orchestrator import ROLES
+
     parser = argparse.ArgumentParser(prog="systemc")
     sub = parser.add_subparsers(dest="command", required=True)
     cap = sub.add_parser("capture", help="capture a local page into data/captures/")
@@ -124,14 +138,20 @@ def main(argv: list[str] | None = None) -> int:
         "audit", help="audit a captured page with System C (needs ANTHROPIC_API_KEY)"
     )
     aud.add_argument("page_id")
-    aud.add_argument("--capture-hash", help="defaults to the newest capture of the page")
+    aud.add_argument("--capture-hash", help="needed only when the page has several captures")
     aud.add_argument("--phase", choices=["dev", "eval"], default="dev")
     aud.add_argument("--group-id", help="shared by repeated Runs of one page")
     aud.add_argument(
-        "--exclude", action="append", default=[], help="ablation: leave a role out (repeatable)"
+        "--exclude",
+        action="append",
+        default=[],
+        choices=[r.value for r in ROLES],
+        help="ablation: leave a role out (repeatable)",
     )
     aud.add_argument(
-        "--resume", action="store_true", help="allow a Run stopped at the Cost Cap to continue"
+        "--resume",
+        action="store_true",
+        help="continue after the phase stopped at the Cost Cap (raise the cap first)",
     )
     aud.set_defaults(func=_audit)
     args = parser.parse_args(argv)

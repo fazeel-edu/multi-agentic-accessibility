@@ -15,7 +15,12 @@ def _wrap(spec: ToolSpec, capture: Capture) -> SdkMcpTool[Any]:
     async def handler(args: dict[str, Any]) -> dict[str, Any]:
         try:
             text = spec.run(capture, args or {})
-        except (KeyError, TypeError, ValueError) as exc:  # bad arguments from the model
+        except (
+            KeyError,
+            TypeError,
+            ValueError,
+            AttributeError,
+        ) as exc:  # bad arguments from the model
             return {"content": [{"type": "text", "text": f"error: {exc}"}], "is_error": True}
         return {"content": [{"type": "text", "text": text}]}
 

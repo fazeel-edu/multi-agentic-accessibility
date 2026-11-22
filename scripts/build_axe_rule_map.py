@@ -26,6 +26,8 @@ def sc_tag(criterion: str) -> str:
 
 def main() -> None:
     data = json.loads(MATRIX.read_text())
+    if data.get("status") == "frozen":
+        raise SystemExit("criteria_matrix.json is frozen; severities and rule ids must not change")
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page()

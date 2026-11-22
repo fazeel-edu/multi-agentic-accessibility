@@ -1,6 +1,7 @@
 """postprocess.run: AuditResult -> Report. Pure; same code for System A and System C."""
 
 from contract.capture import Capture
+from contract.enums import Role
 from contract.matrix import CriteriaMatrix
 from contract.models import AuditResult, MergedIssue, Report, Run
 from postprocess import dedupe
@@ -47,7 +48,10 @@ def run(
 
     issues = []
     for (members, first, entry, roles), rank in zip(drafts, ranks, strict=True):
-        by_role = sorted(members, key=lambda m: m.issue.role.value)
+        # synthesis echoes sort last so a reporting role supplies the text
+        by_role = sorted(
+            members, key=lambda m: (m.issue.role is Role.INCLUSIVE_DESIGN, m.issue.role.value)
+        )
         evidence = list(dict.fromkeys(m.issue.evidence for m in by_role))
         derived = list(dict.fromkeys(d for m in by_role for d in m.issue.derived_from))
         issues.append(

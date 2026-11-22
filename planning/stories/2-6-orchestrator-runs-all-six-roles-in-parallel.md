@@ -2,7 +2,7 @@
 title: 'Story 2.6: Orchestrator'
 type: 'feature'
 created: '2026-11-21'
-status: 'review'
+status: 'done'
 route: 'dispatch'
 ---
 
